@@ -12,10 +12,19 @@ public class MiloController : MonoBehaviour
     [Header("Linterna")]
     public bool linternaEncendida = false;
     public GameObject luzLinterna;
+    
+    // NUEVO: Le restamos 90 grados porque la luz de Unity nace apuntando arriba
+    public float compensacionAngulo = -90f; 
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        
+        // NUEVO: Forzamos al objeto a apagarse (o prenderse) desde el milisegundo 1
+        if (luzLinterna != null)
+        {
+            luzLinterna.SetActive(linternaEncendida);
+        }
     }
 
     void Update()
@@ -30,13 +39,11 @@ public class MiloController : MonoBehaviour
         movimiento.y = Input.GetAxisRaw("Vertical");
         movimiento = movimiento.normalized;
 
-        // NUEVO: Hacemos que la linterna gire hacia donde camina Milo
         if (movimiento != Vector2.zero && luzLinterna != null)
         {
-            // Calculamos el ángulo en base a las teclas que está presionando
+            // Calculamos el ángulo normal y le sumamos la compensación
             float angulo = Mathf.Atan2(movimiento.y, movimiento.x) * Mathf.Rad2Deg;
-            // Aplicamos la rotación al objeto de la luz
-            luzLinterna.transform.rotation = Quaternion.Euler(0, 0, angulo);
+            luzLinterna.transform.rotation = Quaternion.Euler(0, 0, angulo + compensacionAngulo);
         }
 
         if (Input.GetKeyDown(KeyCode.F))

@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.SceneManagement; // NUEVO
+using System.Collections; // NUEVO: Para poder hacer pausas (Corrutinas)
 
 public class EstaticaController : MonoBehaviour
 {
-    [Header("Límites de la Habitación (NUEVO)")]
+    [Header("Límites de la Habitación")]
     public float limiteMinX = -7f;
     public float limiteMaxX = 7f;
     public float limiteMinY = -4f;
@@ -10,7 +12,7 @@ public class EstaticaController : MonoBehaviour
 
     [Header("Configuración de Caza (Ruido)")]
     public float radioDeteccion = 3f;
-    public int ruidoParaCazar = 5; // Asegúrate de que esto esté en 5 en el Inspector
+    public int ruidoParaCazar = 5; 
     public float velocidadBase = 1.5f; 
     public float incrementoVelocidadPorRuido = 0.4f; 
     
@@ -23,6 +25,11 @@ public class EstaticaController : MonoBehaviour
     [Header("Patrullaje")]
     public float rangoMovimientoAleatorio = 5f;
     private Vector2 puntoDestinoAleatorio;
+
+    [Header("Susto y Game Over (NUEVO)")]
+    public AudioSource fuenteAudio;
+    public AudioClip sonidoGrito;
+    private bool yaAtrapado = false; // Seguro para que no grite varias veces
 
     private Transform jugador;
     private GameManager gameManager;
@@ -45,23 +52,19 @@ public class EstaticaController : MonoBehaviour
 
     void Update()
     {
-        // Revisamos que el ManagerRuido exista para evitar errores
-        if (ManagerRuido.instancia == null) return;
+        if (ManagerRuido.instancia == null || yaAtrapado) return; // Si ya lo atrapó, deja de moverse
 
         float nivelDeRuido = ManagerRuido.instancia.ruidoActual;
         float ruidoMaximo = ManagerRuido.instancia.ruidoMaximo;
 
-        // 1. REVISAR CASTIGO MÁXIMO (Ruido en 15)
         if (nivelDeRuido >= ruidoMaximo)
         {
             transform.position = jugador.position;
             ActivarEstatica();
-            Debug.Log("¡RUIDO AL MÁXIMO! La Estática cayó directamente sobre Milo.");
             this.enabled = false; 
             return; 
         }
 
-        // 2. LÓGICA DE CAZA POR RUIDO ALTO (Furia nivel 5+)
         if (nivelDeRuido >= ruidoParaCazar)
         {
             estaCazandoPorRuido = true;
@@ -78,7 +81,6 @@ public class EstaticaController : MonoBehaviour
             }
         }
 
-        // 3. LÓGICA DEL RELOJ DE 15 SEGUNDOS Y DETECCIÓN MENOR
         if (!estaActiva)
         {
             temporizadorAparicion += Time.deltaTime;
@@ -92,7 +94,6 @@ public class EstaticaController : MonoBehaviour
         {
             float distanciaAMilo = Vector2.Distance(transform.position, jugador.position);
 
-            // ACTUALIZADO: Compara con el ruido del ManagerRuido
             if (!gameManager.miloOculto && (nivelDeRuido > 0 || distanciaAMilo <= radioDeteccion))
             {
                 PerseguirAMilo();
@@ -120,7 +121,6 @@ public class EstaticaController : MonoBehaviour
         transform.position = new Vector2(xA, yA);
         
         AsignarNuevoDestinoAleatorio();
-        Debug.Log("¡ALARMA! Recorrido aleatorio de 15 segundos.");
     }
 
     void ActivarEstatica()
@@ -141,7 +141,6 @@ public class EstaticaController : MonoBehaviour
     {
         float nivelDeRuido = ManagerRuido.instancia.ruidoActual;
         float velocidadExtra = (nivelDeRuido - ruidoParaCazar) * incrementoVelocidadPorRuido;
-        // Evitamos que la velocidad sea negativa si el ruido baja
         if (velocidadExtra < 0) velocidadExtra = 0; 
         
         float velocidadActual = velocidadBase + velocidadExtra;
@@ -151,7 +150,6 @@ public class EstaticaController : MonoBehaviour
     void PatrullarHabitacion()
     {
         transform.position = Vector2.MoveTowards(transform.position, puntoDestinoAleatorio, velocidadBase * Time.deltaTime);
-        
         if (Vector2.Distance(transform.position, puntoDestinoAleatorio) < 0.1f)
         {
             AsignarNuevoDestinoAleatorio();
@@ -167,9 +165,33 @@ public class EstaticaController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && !gameManager.miloOculto)
+        // ¡NUEVO! Detecta a Milo, verifica que no esté escondido y que no lo haya atrapado ya
+        if (collision.CompareTag("Player") && !gameManager.miloOculto && !yaAtrapado)
         {
-            Debug.Log("¡GAME OVER! La Estática te alcanzó.");
+            yaAtrapado = true;
+            StartCoroutine(SecuenciaMuerte());
         }
+    }
+
+    // ¡NUEVO! La corrutina que maneja el susto y el cambio de pantalla
+    IEnumerator SecuenciaMuerte()
+    {
+        Debug.Log("¡La Estática te atrapó!");
+
+        // 1. Congelamos a Milo en su lugar
+        MiloController milo = FindObjectOfType<MiloController>();
+        if (milo != null) milo.puedeMoverse = false;
+
+        // 2. Reproducimos el grito
+        if (fuenteAudio != null && sonidoGrito != null)
+        {
+            fuenteAudio.PlayOneShot(sonidoGrito);
+        }
+
+        // 3. Esperamos 1.5 segundos para que suene el grito completo (ajústalo si dura más)
+        yield return new WaitForSeconds(2.5f);
+
+        // 4. Cambiamos a la pantalla de perder
+        SceneManager.LoadScene("PantallaPerder");
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // NUEVO: Para cambiar de escena
 
 public class ManagerRuido : MonoBehaviour
 {
@@ -12,7 +13,6 @@ public class ManagerRuido : MonoBehaviour
     public float ruidoMaximo = 15f; 
     public float umbralEstatica = 5f; 
     
-    // AQUÍ ESTÁ EL PUBLIC QUE UNITY SE NIEGA A LEER
     public float ruidoActual = 0f; 
     
     private bool estaticaInvocada = false;
@@ -31,9 +31,13 @@ public class ManagerRuido : MonoBehaviour
     {
         ruidoActual += cantidad;
         
-        if (ruidoActual > ruidoMaximo) 
+        // ¡NUEVO! Lógica de derrota si llegamos al tope
+        if (ruidoActual >= ruidoMaximo) 
         {
             ruidoActual = ruidoMaximo; 
+            ActualizarSliderVisual();
+            PerderPorRuido();
+            return; // Detenemos el código aquí para que no siga evaluando más cosas
         }
         
         ActualizarSliderVisual();
@@ -76,5 +80,12 @@ public class ManagerRuido : MonoBehaviour
     {
         estaticaInvocada = true;
         Debug.Log("¡EL RUIDO LLEGÓ A 5! La Estática ha aparecido.");
+    }
+
+    // NUEVO: Función para terminar el juego por exceso de ruido
+    void PerderPorRuido()
+    {
+        Debug.Log("Milo hizo demasiado ruido. GAME OVER.");
+        SceneManager.LoadScene("PantallaPerder");
     }
 }
