@@ -6431,6 +6431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19fcb2c4ffe5046f69cc1289440e2424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nombreSiguienteEscena: Sala
 --- !u!1 &1538985637
 GameObject:
   m_ObjectHideFlags: 0

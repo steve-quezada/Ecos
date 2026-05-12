@@ -6,6 +6,10 @@ public class Escondite : MonoBehaviour
     [Header("Configuración de Salida")]
     public Vector2 offsetSalida = new Vector2(1.5f, 0f); 
 
+    [Header("Modo Trampa")]
+    public bool esTrampaMortal = false;
+    public bool ocultarSpriteAlMorir = true;
+
     private GameManager gameManager;
     private bool enZonaDeEscondite = false;
     
@@ -20,12 +24,25 @@ public class Escondite : MonoBehaviour
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
+
+        if (gameManager == null)
+        {
+            Debug.LogError("No se encontró GameManager para el escondite: " + gameObject.name);
+        }
     }
 
     void Update()
     {
+        if (gameManager == null) return;
+
         if (enZonaDeEscondite && Input.GetKeyDown(KeyCode.E))
         {
+            if (esTrampaMortal)
+            {
+                ActivarTrampaMortal();
+                return;
+            }
+
             if (!gameManager.miloOculto)
             {
                 EsconderMilo();
@@ -70,6 +87,30 @@ public class Escondite : MonoBehaviour
         }
 
         Debug.Log("Milo salió del escondite. El ruido dejó de bajar.");
+    }
+
+    void ActivarTrampaMortal()
+    {
+        if (rutinaReduccionRuido != null)
+        {
+            StopCoroutine(rutinaReduccionRuido);
+            rutinaReduccionRuido = null;
+        }
+
+        gameManager.miloOculto = false;
+
+        if (miloController != null)
+        {
+            miloController.puedeMoverse = false;
+        }
+
+        if (ocultarSpriteAlMorir && miloSprite != null)
+        {
+            miloSprite.enabled = false;
+        }
+
+        enZonaDeEscondite = false;
+        Debug.Log("\u00a1TRAMPA! Ese escondite era falso. Milo murió al instante.");
     }
 
     // El temporizador que se ejecuta cada 1 segundo

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -11,9 +12,18 @@ public class GameManager : MonoBehaviour
     public float tiempoParaRestar = 1f; // 1 segundo
     private float temporizador = 0f;
 
-    [Header("Inventario - Cuarto de Milo")]
+    [Header("Inventario por Habitación")]
+    [SerializeField] private List<string> objetosRequeridos = new List<string>();
+    [SerializeField] private List<string> objetosRecolectados = new List<string>();
+
+    [Header("Compatibilidad (Legacy)")]
     public bool tieneMochila = false;
     public bool tieneLlave = false;
+
+    void Start()
+    {
+        RegistrarObjetosRequeridosEnEscena();
+    }
 
     void Update()
     {
@@ -52,21 +62,105 @@ public class GameManager : MonoBehaviour
     // Esta función la llamaremos cuando Milo toque un objeto
     public void RecogerObjeto(string nombreObjeto)
     {
-        if (nombreObjeto == "Mochila")
+        string nombreNormalizado = NormalizarNombreObjeto(nombreObjeto);
+
+        if (string.IsNullOrEmpty(nombreNormalizado))
+        {
+            Debug.LogWarning("Intentaste recoger un objeto sin nombre.");
+            return;
+        }
+
+        if (!objetosRequeridos.Contains(nombreNormalizado))
+        {
+            objetosRequeridos.Add(nombreNormalizado);
+        }
+
+        if (objetosRecolectados.Contains(nombreNormalizado))
+        {
+            return;
+        }
+
+        objetosRecolectados.Add(nombreNormalizado);
+
+        if (nombreNormalizado == "Mochila")
         {
             tieneMochila = true;
-            Debug.Log("¡Recogiste la Mochila!");
         }
-        else if (nombreObjeto == "Llave")
+        else if (nombreNormalizado == "Llave")
         {
             tieneLlave = true;
-            Debug.Log("¡Recogiste la Llave!");
         }
+
+        Debug.Log("¡Recogiste " + nombreNormalizado + "!");
     }
 
     // Esta función la usará la puerta para saber si te deja salir
     public bool TieneTodosLosObjetos()
     {
-        return tieneMochila && tieneLlave;
+        if (objetosRequeridos.Count == 0)
+        {
+            return true;
+        }
+
+        for (int i = 0; i < objetosRequeridos.Count; i++)
+        {
+            if (!objetosRecolectados.Contains(objetosRequeridos[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public string ObtenerObjetosFaltantes()
+    {
+        List<string> faltantes = new List<string>();
+
+        for (int i = 0; i < objetosRequeridos.Count; i++)
+        {
+            string objeto = objetosRequeridos[i];
+            if (!objetosRecolectados.Contains(objeto))
+            {
+                faltantes.Add(objeto);
+            }
+        }
+
+        return string.Join(", ", faltantes);
+    }
+
+    private void RegistrarObjetosRequeridosEnEscena()
+    {
+        objetosRequeridos.Clear();
+        objetosRecolectados.Clear();
+        tieneMochila = false;
+        tieneLlave = false;
+
+        ObjetoObligatorio[] objetos = FindObjectsOfType<ObjetoObligatorio>();
+
+        for (int i = 0; i < objetos.Length; i++)
+        {
+            string nombreNormalizado = NormalizarNombreObjeto(objetos[i].nombreDelObjeto);
+
+            if (string.IsNullOrEmpty(nombreNormalizado))
+            {
+                continue;
+            }
+
+            if (!objetosRequeridos.Contains(nombreNormalizado))
+            {
+                objetosRequeridos.Add(nombreNormalizado);
+            }
+        }
+    }
+
+    private string NormalizarNombreObjeto(string nombreObjeto)
+    {
+        if (string.IsNullOrWhiteSpace(nombreObjeto))
+        {
+            return string.Empty;
+        }
+
+        return nombreObjeto.Trim();
     }
 }

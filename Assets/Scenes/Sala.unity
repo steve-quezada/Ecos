@@ -570,7 +570,7 @@ GameObject:
   - component: {fileID: 90104671}
   - component: {fileID: 90104672}
   m_Layer: 0
-  m_Name: Escondite_cama
+  m_Name: Cortinas_Seguras
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2066,7 +2066,7 @@ GameObject:
   - component: {fileID: 207466900}
   - component: {fileID: 207466899}
   m_Layer: 0
-  m_Name: Closet
+  m_Name: Chimenea_Trampa
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2130,6 +2130,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offsetSalida: {x: 1.5, y: 0}
+  esTrampaMortal: 1
+  ocultarSpriteAlMorir: 1
 --- !u!212 &207466901
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3194,7 +3196,7 @@ GameObject:
   - component: {fileID: 430436292}
   - component: {fileID: 430436295}
   m_Layer: 0
-  m_Name: Oso_Eco
+  m_Name: Fotografia_Eco
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3212,7 +3214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 057cfc9e0bd9f4a5084f15fab6056434, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nombreEco: Oso de Peluche
+  nombreEco: Fotografia Familiar
   panelRompecabezas: {fileID: 982157097}
 --- !u!212 &430436293
 SpriteRenderer:
@@ -3729,7 +3731,7 @@ GameObject:
   - component: {fileID: 559196508}
   - component: {fileID: 559196507}
   m_Layer: 0
-  m_Name: Mochila
+  m_Name: Libros
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3747,7 +3749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5dd7b684542447a99da4889087c767, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nombreDelObjeto: Mochila
+  nombreDelObjeto: Libros
 --- !u!58 &559196508
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -6431,6 +6433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19fcb2c4ffe5046f69cc1289440e2424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nombreSiguienteEscena: Cocina
 --- !u!1 &1538985637
 GameObject:
   m_ObjectHideFlags: 0

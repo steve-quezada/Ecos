@@ -3,7 +3,7 @@ using UnityEngine;
 public class ObjetoObligatorio : MonoBehaviour
 {
     [Header("Configuración del Objeto")]
-    // Aquí escribirás "Mochila" o "Llave" desde el Inspector de Unity
+    // Escribe el nombre del objeto tal como quieres que se valide en la puerta.
     public string nombreDelObjeto; 
     
     private GameManager gameManager;
@@ -11,6 +11,11 @@ public class ObjetoObligatorio : MonoBehaviour
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
+
+        if (gameManager == null)
+        {
+            Debug.LogError("No se encontró GameManager para el objeto: " + gameObject.name);
+        }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -18,6 +23,8 @@ public class ObjetoObligatorio : MonoBehaviour
         // Si Milo toca el objeto
         if (collision.CompareTag("Player"))
         {
+            if (gameManager == null) return;
+
             // Le avisamos al GameManager qué objeto recogimos
             gameManager.RecogerObjeto(nombreDelObjeto);
             
