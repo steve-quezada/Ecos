@@ -880,6 +880,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panelReglas: {fileID: 967503259}
+  fondoMenu: {fileID: 0}
+  camaraMenu: {fileID: 0}
 --- !u!4 &1544740538
 Transform:
   m_ObjectHideFlags: 0
