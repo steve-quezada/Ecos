@@ -591,6 +591,9 @@ MonoBehaviour:
   offsetSalida: {x: 1.5, y: 0}
   esTrampaMortal: 0
   ocultarSpriteAlMorir: 1
+  fuenteAudioMuerte: {fileID: 0}
+  sonidoGritoMuerte: {fileID: 0}
+  volumenGritoMuerte: 1
 --- !u!212 &90104669
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1941,6 +1944,9 @@ MonoBehaviour:
   offsetSalida: {x: 1.5, y: 0}
   esTrampaMortal: 1
   ocultarSpriteAlMorir: 1
+  fuenteAudioMuerte: {fileID: 0}
+  sonidoGritoMuerte: {fileID: 0}
+  volumenGritoMuerte: 1
 --- !u!212 &207466901
 SpriteRenderer:
   m_ObjectHideFlags: 0
