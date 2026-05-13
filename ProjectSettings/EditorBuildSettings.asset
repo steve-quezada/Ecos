@@ -26,4 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/PantallaPerder.unity
     guid: e7281c5e0fb9848198dbb9885dec309c
+  - enabled: 1
+    path: Assets/Scenes/PantallaTrampa.unity
+    guid: cacd9eceab7492d42ac9b42cb16fd5a2
   m_configObjects: {}

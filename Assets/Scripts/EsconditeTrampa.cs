@@ -4,6 +4,8 @@ using System.Collections;
 
 public class EsconditeTrampa : MonoBehaviour
 {
+    private const string EscenaPantallaTrampa = "PantallaTrampa";
+
     [Header("Interacción")]
     public KeyCode teclaInteraccion = KeyCode.E;
     private bool jugadorEnRango = false;
@@ -79,7 +81,14 @@ public class EsconditeTrampa : MonoBehaviour
         // 4. Esperamos exactamente los 2.5 segundos que pediste
         yield return new WaitForSeconds(2.5f);
 
-        // 5. ¡Game Over! Mandamos a la pantalla de perder
-        SceneManager.LoadScene("PantallaPerder");
+        // 5. ¡Game Over! Mandamos a la pantalla de trampa
+        if (Application.CanStreamedLevelBeLoaded(EscenaPantallaTrampa))
+        {
+            SceneManager.LoadScene(EscenaPantallaTrampa);
+        }
+        else
+        {
+            Debug.LogError("No se puede cargar " + EscenaPantallaTrampa + ". Verifica Build Settings.");
+        }
     }
 }

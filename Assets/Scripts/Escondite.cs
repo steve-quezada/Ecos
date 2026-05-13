@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class Escondite : MonoBehaviour
 {
+    private const string EscenaPantallaTrampa = "PantallaTrampa";
+
     [Header("Configuración de Salida")]
     public Vector2 offsetSalida = new Vector2(1.5f, 0f); 
 
@@ -113,13 +115,13 @@ public class Escondite : MonoBehaviour
         enZonaDeEscondite = false;
         Debug.Log("\u00a1TRAMPA! Ese escondite era falso. Milo murió al instante.");
 
-        if (Application.CanStreamedLevelBeLoaded("PantallaPerder"))
+        if (Application.CanStreamedLevelBeLoaded(EscenaPantallaTrampa))
         {
-            SceneManager.LoadScene("PantallaPerder");
+            SceneManager.LoadScene(EscenaPantallaTrampa);
         }
         else
         {
-            Debug.LogError("No se puede cargar PantallaPerder. Verifica Build Settings.");
+            Debug.LogError("No se puede cargar " + EscenaPantallaTrampa + ". Verifica Build Settings.");
         }
     }
 
