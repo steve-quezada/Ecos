@@ -5,22 +5,36 @@ public class FuenteRuido : MonoBehaviour
     public int puntosDeRuido = 1;
     private GameManager gameManager;
 
-    void Start()
+    void Awake()
     {
-        // Encontramos el cerebro del juego en la escena automáticamente
         gameManager = FindObjectOfType<GameManager>();
     }
 
-    // Unity llama a esta función automáticamente cuando algo entra al Trigger
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // Comprobamos si el objeto que pisó esta zona tiene la etiqueta "Player" (Milo)
-        if (collision.CompareTag("Player"))
+        if (!collision.CompareTag("Player"))
+        {
+            return;
+        }
+
+        if (ManagerRuido.instancia != null)
+        {
+            ManagerRuido.instancia.AgregarRuido(puntosDeRuido);
+            return;
+        }
+
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        if (gameManager != null)
         {
             gameManager.AgregarRuido(puntosDeRuido);
-            
-            // Opcional: Destruir el objeto para que el vidrio solo suene una vez al pisarlo
-            // Destroy(gameObject); 
+        }
+        else
+        {
+            Debug.LogWarning("No existe gestor de ruido en la escena para: " + gameObject.name);
         }
     }
 }
