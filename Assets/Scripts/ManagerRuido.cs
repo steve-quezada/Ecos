@@ -1,9 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement; // NUEVO: Para cambiar de escena
+using System.Collections;
 
 public class ManagerRuido : MonoBehaviour
 {
+    private const string EscenaPantallaPerder = "PantallaPerder";
+    private const float DuracionFundidoMuerte = 2.5f;
+
     public static ManagerRuido instancia;
 
     [Header("Configuración Visual")]
@@ -16,6 +20,7 @@ public class ManagerRuido : MonoBehaviour
     public float ruidoActual = 0f; 
     
     private bool estaticaInvocada = false;
+    private bool derrotaEnCurso = false;
 
     void Awake()
     {
@@ -85,7 +90,26 @@ public class ManagerRuido : MonoBehaviour
     // NUEVO: Función para terminar el juego por exceso de ruido
     void PerderPorRuido()
     {
+        if (derrotaEnCurso)
+        {
+            return;
+        }
+
+        derrotaEnCurso = true;
         Debug.Log("Milo hizo demasiado ruido. GAME OVER.");
-        SceneManager.LoadScene("PantallaPerder");
+        StartCoroutine(SecuenciaDerrotaPorRuido());
+    }
+
+    IEnumerator SecuenciaDerrotaPorRuido()
+    {
+        if (!Application.CanStreamedLevelBeLoaded(EscenaPantallaPerder))
+        {
+            Debug.LogError("No se puede cargar " + EscenaPantallaPerder + ". Verifica Build Settings.");
+            derrotaEnCurso = false;
+            yield break;
+        }
+
+        yield return EfectoMuertePantalla.FundirANegro(DuracionFundidoMuerte);
+        SceneManager.LoadScene(EscenaPantallaPerder);
     }
 }

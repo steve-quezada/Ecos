@@ -5,6 +5,7 @@ using System.Collections;
 public class EsconditeTrampa : MonoBehaviour
 {
     private const string EscenaPantallaTrampa = "PantallaTrampa";
+    private const float DuracionFundidoMuerte = 2.5f;
 
     [Header("Interacción")]
     public KeyCode teclaInteraccion = KeyCode.E;
@@ -16,6 +17,7 @@ public class EsconditeTrampa : MonoBehaviour
     public GameObject efectoFuegoVisual; 
     public AudioSource fuenteAudio;
     public AudioClip sonidoQuemaduraOGrito;
+    [Range(0f, 1f)] public float volumenGrito = 1f;
 
     private MiloController milo;
 
@@ -73,22 +75,50 @@ public class EsconditeTrampa : MonoBehaviour
         }
 
         // 3. Reproducimos el grito o sonido de quemadura
-        if (fuenteAudio != null && sonidoQuemaduraOGrito != null)
+        ReproducirGritoTrampa();
+
+        if (!Application.CanStreamedLevelBeLoaded(EscenaPantallaTrampa))
         {
-            fuenteAudio.PlayOneShot(sonidoQuemaduraOGrito);
+            Debug.LogError("No se puede cargar " + EscenaPantallaTrampa + ". Verifica Build Settings.");
+            yield break;
         }
 
-        // 4. Esperamos exactamente los 2.5 segundos que pediste
-        yield return new WaitForSeconds(2.5f);
+        // 4. Fundido progresivo a negro
+        yield return EfectoMuertePantalla.FundirANegro(DuracionFundidoMuerte);
 
         // 5. ¡Game Over! Mandamos a la pantalla de trampa
-        if (Application.CanStreamedLevelBeLoaded(EscenaPantallaTrampa))
+        SceneManager.LoadScene(EscenaPantallaTrampa);
+    }
+
+    void ReproducirGritoTrampa()
+    {
+        AudioClip clip = sonidoQuemaduraOGrito;
+        AudioSource fuente = fuenteAudio;
+
+        EstaticaController estatica = FindObjectOfType<EstaticaController>();
+        if (clip == null && estatica != null)
         {
-            SceneManager.LoadScene(EscenaPantallaTrampa);
+            clip = estatica.sonidoGrito;
+        }
+
+        if (fuente == null && estatica != null)
+        {
+            fuente = estatica.fuenteAudio;
+        }
+
+        if (clip == null)
+        {
+            Debug.LogWarning("EsconditeTrampa sin clip de grito configurado en: " + gameObject.name);
+            return;
+        }
+
+        if (fuente != null)
+        {
+            fuente.PlayOneShot(clip, volumenGrito);
         }
         else
         {
-            Debug.LogError("No se puede cargar " + EscenaPantallaTrampa + ". Verifica Build Settings.");
+            AudioSource.PlayClipAtPoint(clip, transform.position, volumenGrito);
         }
     }
 }

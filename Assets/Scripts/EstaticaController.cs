@@ -4,6 +4,9 @@ using System.Collections; // NUEVO: Para poder hacer pausas (Corrutinas)
 
 public class EstaticaController : MonoBehaviour
 {
+    private const string EscenaPantallaPerder = "PantallaPerder";
+    private const float DuracionFundidoMuerte = 2.5f;
+
     [Header("Límites de la Habitación")]
     public float limiteMinX = -7f;
     public float limiteMaxX = 7f;
@@ -188,10 +191,16 @@ public class EstaticaController : MonoBehaviour
             fuenteAudio.PlayOneShot(sonidoGrito);
         }
 
-        // 3. Esperamos 1.5 segundos para que suene el grito completo (ajústalo si dura más)
-        yield return new WaitForSeconds(2.5f);
+        if (!Application.CanStreamedLevelBeLoaded(EscenaPantallaPerder))
+        {
+            Debug.LogError("No se puede cargar " + EscenaPantallaPerder + ". Verifica Build Settings.");
+            yield break;
+        }
+
+        // 3. Fundido progresivo a negro mientras suena el susto
+        yield return EfectoMuertePantalla.FundirANegro(DuracionFundidoMuerte);
 
         // 4. Cambiamos a la pantalla de perder
-        SceneManager.LoadScene("PantallaPerder");
+        SceneManager.LoadScene(EscenaPantallaPerder);
     }
 }
