@@ -85,6 +85,7 @@ public class GameManager : MonoBehaviour
         if (nombreNormalizado == "Mochila")
         {
             tieneMochila = true;
+            Debug.Log("¡Recogiste un objeto!");
         }
         else if (nombreNormalizado == "Llave")
         {

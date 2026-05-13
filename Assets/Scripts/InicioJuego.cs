@@ -3,8 +3,12 @@ using UnityEngine;
 public class InicioJuego : MonoBehaviour
 {
     [Header("Referencias")]
+    [Tooltip("Si dejas esto vacío, Milo aparecerá normalmente sin tirar nada.")]
     public GameObject guitarraPrefab;
-    public Transform posicionCama; // Un Empty Object sobre la cama
+    
+    [Tooltip("El lugar donde Milo va a aparecer (la cama o la puerta)")]
+    public Transform puntoDeAparicion; 
+    
     public MiloController milo;
 
     private GameObject guitarraInstanciada;
@@ -12,25 +16,40 @@ public class InicioJuego : MonoBehaviour
 
     void Start()
     {
-        // 1. Posicionamos a Milo en la cama y bloqueamos su movimiento
-        milo.transform.position = posicionCama.position;
-        milo.puedeMoverse = false;
+        // 1. Posicionamos a Milo en el lugar inicial (cama o puerta)
+        milo.transform.position = puntoDeAparicion.position;
 
-        // 2. Instanciamos la guitarra sobre él
-        // La ponemos un poco más arriba (0.5f en Y) para que se vea encima
-        Vector3 posicionGuitarra = posicionCama.position + new Vector3(0, 0.5f, 0);
-        guitarraInstanciada = Instantiate(guitarraPrefab, posicionGuitarra, Quaternion.identity);
-        
-        // Desactivamos la física de la guitarra al inicio para que no se caiga sola
-        Rigidbody2D rbGuitarra = guitarraInstanciada.GetComponent<Rigidbody2D>();
-        if (rbGuitarra != null) rbGuitarra.simulated = false;
+        // 2. Revisamos si HAY guitarra (es decir, si estamos en la recámara original)
+        if (guitarraPrefab != null)
+        {
+            milo.puedeMoverse = false; // Lo bloqueamos para que no camine
 
-        Debug.Log("Milo está durmiendo con su guitarra...");
+            // Instanciamos la guitarra sobre él
+            Vector3 posicionGuitarra = puntoDeAparicion.position + new Vector3(0, 0.5f, 0);
+            guitarraInstanciada = Instantiate(guitarraPrefab, posicionGuitarra, Quaternion.identity);
+            
+            // Desactivamos la física de la guitarra al inicio para que no se caiga
+            Rigidbody2D rbGuitarra = guitarraInstanciada.GetComponent<Rigidbody2D>();
+            if (rbGuitarra != null) rbGuitarra.simulated = false;
+
+            Debug.Log("Milo está durmiendo con su guitarra...");
+        }
+        else 
+        {
+            // 3. Si NO hay guitarra (es decir, entramos a una habitación nueva)
+            milo.puedeMoverse = true; // Se puede mover de inmediato
+            miloEnCama = false; // Ya no está dormido
+            
+            Debug.Log("Milo entró a una nueva habitación de pie.");
+            
+            // Apagamos este script de inmediato porque no hay guitarra que tirar
+            this.enabled = false; 
+        }
     }
 
     void Update()
     {
-        // 3. Detectamos cuando Milo se levanta (puedes usar 'E' o cualquier tecla de movimiento)
+        // Esto solo se ejecuta si Milo empezó dormido con la guitarra
         if (miloEnCama && (Input.GetKeyDown(KeyCode.E) || Input.GetAxis("Horizontal") != 0))
         {
             LevantarseDeLaCama();
@@ -43,13 +62,14 @@ public class InicioJuego : MonoBehaviour
         milo.puedeMoverse = true;
 
         // 4. La guitarra se cae
-        Rigidbody2D rbGuitarra = guitarraInstanciada.GetComponent<Rigidbody2D>();
-        if (rbGuitarra != null)
+        if (guitarraInstanciada != null)
         {
-            rbGuitarra.simulated = true;
-            
-            // Le damos un empujón microscópico solo para que se despegue, o lo puedes borrar por completo
-            rbGuitarra.AddForce(new Vector2(0.1f, 0f), ForceMode2D.Impulse); 
+            Rigidbody2D rbGuitarra = guitarraInstanciada.GetComponent<Rigidbody2D>();
+            if (rbGuitarra != null)
+            {
+                rbGuitarra.simulated = true;
+                rbGuitarra.AddForce(new Vector2(0.1f, 0f), ForceMode2D.Impulse); 
+            }
         }
 
         // 5. ¡EL ESTRUENDO! Subimos el ruido en 5 de jalón

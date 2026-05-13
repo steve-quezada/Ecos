@@ -1,0 +1,56 @@
+using UnityEngine;
+using TMPro; // Crucial para usar TextMeshPro
+
+public class ConsolaEnPantalla : MonoBehaviour
+{
+    [Header("UI de la Consola")]
+    public TextMeshProUGUI textoConsola;
+    
+    [Header("Configuración")]
+    public int maxLineas = 8; // Para que no tape toda la pantalla
+    
+    private string registroLogs = "";
+
+    // OnEnable se conecta a la consola secreta de Unity cuando el script despierta
+    void OnEnable()
+    {
+        Application.logMessageReceived += CapturarLog;
+    }
+
+    // OnDisable se desconecta por seguridad si apagas el objeto
+    void OnDisable()
+    {
+        Application.logMessageReceived -= CapturarLog;
+    }
+
+    // Esta función recibe en automático cada Debug.Log de tu juego
+    void CapturarLog(string mensaje, string rastro, LogType tipo)
+    {
+        // Si el mensaje es un error rojo, le ponemos una etiqueta de color para distinguirlo
+        if (tipo == LogType.Error || tipo == LogType.Exception)
+        {
+            mensaje = "<color=red>" + mensaje + "</color>";
+        }
+        else if (tipo == LogType.Warning)
+        {
+            mensaje = "<color=yellow>" + mensaje + "</color>";
+        }
+
+        // Agregamos el nuevo mensaje a nuestra lista
+        registroLogs += mensaje + "\n";
+
+        // Magia para borrar las líneas viejas y que no se llene la memoria
+        string[] lineas = registroLogs.Split('\n');
+        if (lineas.Length > maxLineas)
+        {
+            // Nos quedamos solo con las líneas más recientes
+            registroLogs = string.Join("\n", lineas, lineas.Length - maxLineas, maxLineas);
+        }
+
+        // Lo mandamos al Canvas
+        if (textoConsola != null)
+        {
+            textoConsola.text = registroLogs;
+        }
+    }
+}
