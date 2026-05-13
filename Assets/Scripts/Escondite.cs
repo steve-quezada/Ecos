@@ -1,5 +1,6 @@
 using System.Collections; // Necesario para usar Corrutinas (el temporizador)
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Escondite : MonoBehaviour
 {
@@ -111,6 +112,15 @@ public class Escondite : MonoBehaviour
 
         enZonaDeEscondite = false;
         Debug.Log("\u00a1TRAMPA! Ese escondite era falso. Milo murió al instante.");
+
+        if (Application.CanStreamedLevelBeLoaded("PantallaPerder"))
+        {
+            SceneManager.LoadScene("PantallaPerder");
+        }
+        else
+        {
+            Debug.LogError("No se puede cargar PantallaPerder. Verifica Build Settings.");
+        }
     }
 
     // El temporizador que se ejecuta cada 1 segundo
