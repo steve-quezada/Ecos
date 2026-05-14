@@ -9,27 +9,57 @@ public class TrampaRuido : MonoBehaviour
 
     private AudioSource audioSource;
 
+    void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
+
     void Start()
     {
-        // Configuramos el reproductor de audio internamente
-        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            Debug.LogWarning("TrampaRuido sin AudioSource en: " + gameObject.name);
+            return;
+        }
+
         audioSource.clip = sonidoTrampa;
         audioSource.playOnAwake = false;
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // Verificamos que sea Milo (Player) quien entra en la trampa
-        if (collision.CompareTag("Player"))
+        if (!collision.CompareTag("Player"))
         {
-            // Reproducimos el sonido (ej. los vidrios)
-            audioSource.Play();
-            
-            // Enviamos exactamente 1 punto al medidor oficial
-            ManagerRuido.instancia.AgregarRuido(cantidadDeRuido);
-            
-            // Confirmación en consola del script oficial
-            Debug.Log("Milo pisó una trampa de sonido.");
+            return;
         }
+
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+
+        if (audioSource != null)
+        {
+            if (sonidoTrampa != null && audioSource.clip != sonidoTrampa)
+            {
+                audioSource.clip = sonidoTrampa;
+            }
+
+            if (audioSource.clip != null)
+            {
+                audioSource.Play();
+            }
+        }
+
+        if (ManagerRuido.instancia != null)
+        {
+            ManagerRuido.instancia.AgregarRuido(cantidadDeRuido);
+        }
+        else
+        {
+            Debug.LogWarning("No existe ManagerRuido.instancia en la escena para: " + gameObject.name);
+        }
+
+        Debug.Log("Milo piso una trampa de sonido.");
     }
 }

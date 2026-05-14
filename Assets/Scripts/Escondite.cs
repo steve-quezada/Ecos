@@ -1,14 +1,23 @@
 using System.Collections; // Necesario para usar Corrutinas (el temporizador)
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Escondite : MonoBehaviour
 {
+    private const string EscenaPantallaTrampa = "PantallaTrampa";
+    private const float DuracionFundidoMuerte = 2.5f;
+
     [Header("Configuración de Salida")]
     public Vector2 offsetSalida = new Vector2(1.5f, 0f); 
 
     [Header("Modo Trampa")]
     public bool esTrampaMortal = false;
     public bool ocultarSpriteAlMorir = true;
+
+    [Header("Audio de Muerte Trampa")]
+    public AudioSource fuenteAudioMuerte;
+    public AudioClip sonidoGritoMuerte;
+    [Range(0f, 1f)] public float volumenGritoMuerte = 1f;
 
     private GameManager gameManager;
     private bool enZonaDeEscondite = false;
@@ -20,6 +29,7 @@ public class Escondite : MonoBehaviour
 
     // Esta variable guarda nuestro temporizador
     private Coroutine rutinaReduccionRuido;
+    private bool muerteTrampaEnCurso = false;
 
     void Start()
     {
@@ -91,6 +101,13 @@ public class Escondite : MonoBehaviour
 
     void ActivarTrampaMortal()
     {
+        if (muerteTrampaEnCurso)
+        {
+            return;
+        }
+
+        muerteTrampaEnCurso = true;
+
         if (rutinaReduccionRuido != null)
         {
             StopCoroutine(rutinaReduccionRuido);
@@ -111,6 +128,54 @@ public class Escondite : MonoBehaviour
 
         enZonaDeEscondite = false;
         Debug.Log("\u00a1TRAMPA! Ese escondite era falso. Milo murió al instante.");
+
+        ReproducirGritoMuerte();
+        StartCoroutine(SecuenciaMuerteTrampa());
+    }
+
+    IEnumerator SecuenciaMuerteTrampa()
+    {
+        if (!Application.CanStreamedLevelBeLoaded(EscenaPantallaTrampa))
+        {
+            Debug.LogError("No se puede cargar " + EscenaPantallaTrampa + ". Verifica Build Settings.");
+            muerteTrampaEnCurso = false;
+            yield break;
+        }
+
+        yield return EfectoMuertePantalla.FundirANegro(DuracionFundidoMuerte);
+        SceneManager.LoadScene(EscenaPantallaTrampa);
+    }
+
+    void ReproducirGritoMuerte()
+    {
+        AudioClip clip = sonidoGritoMuerte;
+        AudioSource fuente = fuenteAudioMuerte;
+
+        EstaticaController estatica = FindObjectOfType<EstaticaController>();
+        if (clip == null && estatica != null)
+        {
+            clip = estatica.sonidoGrito;
+        }
+
+        if (fuente == null && estatica != null)
+        {
+            fuente = estatica.fuenteAudio;
+        }
+
+        if (clip == null)
+        {
+            Debug.LogWarning("Escondite trampa sin clip de grito configurado en: " + gameObject.name);
+            return;
+        }
+
+        if (fuente != null)
+        {
+            fuente.PlayOneShot(clip, volumenGritoMuerte);
+        }
+        else
+        {
+            AudioSource.PlayClipAtPoint(clip, transform.position, volumenGritoMuerte);
+        }
     }
 
     // El temporizador que se ejecuta cada 1 segundo

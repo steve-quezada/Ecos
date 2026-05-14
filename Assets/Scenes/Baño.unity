@@ -1921,7 +1921,7 @@ CircleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198147150}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -8043,11 +8043,12 @@ MonoBehaviour:
   limiteMaxY: 4
   radioDeteccion: 3
   ruidoParaCazar: 5
-  velocidadBase: 2.5
-  incrementoVelocidadPorRuido: 0.4
+  velocidadBase: 2.0
+  incrementoVelocidadPorRuido: 0.18
   tiempoAparicion: 15
-  duracionPatrullaje: 15
+  duracionPatrullaje: 10
   rangoMovimientoAleatorio: 8
+  sonidoAparicion: {fileID: 8300000, guid: 39ac928c262d3a4479fc89b4c80499a7, type: 3}
 --- !u!1 &1858530605
 GameObject:
   m_ObjectHideFlags: 0
