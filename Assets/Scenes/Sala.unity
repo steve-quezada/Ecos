@@ -1423,6 +1423,19 @@ MonoBehaviour:
   tiempoParaRestar: 1
   objetosRequeridos: []
   objetosRecolectados: []
+  iconoObjetosObligatorios: {fileID: 0}
+  iconoEco: {fileID: 0}
+  colorLineaTomado: {r: 0.86, g: 0.18, b: 0.18, a: 0.82}
+  anguloLineaDiagonal: -24
+  grosorLinea: 4
+  largoRelativoLinea: 0.72
+  margenHorizontalLinea: 16
+  desplazamientoVerticalLineaObjetos: -8
+  desplazamientoHorizontalLineaPrimerObjeto: -6
+  desplazamientoHorizontalLineaSegundoObjeto: 6
+  ajustarObjetosObligatoriosEn1080: 1
+  tamanoObjetosObligatorios1080: {x: 84, y: 84}
+  escalaObjetosObligatorios1080: 3.8
   tieneMochila: 0
   tieneLlave: 0
 --- !u!114 &155251530
@@ -3119,7 +3132,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430436291}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 057cfc9e0bd9f4a5084f15fab6056434, type: 3}
   m_Name: 
@@ -3222,7 +3235,7 @@ PolygonCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -5040,13 +5053,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 982157097}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f06badf2d03cf4bc3a54ab2de0bbbeff, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e6e7184f2e24f44a95df94860589ca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   uiObjetosObligatorios: {fileID: 731980650}
   uiEco: {fileID: 574349783}
   totalPiezas: 9
   ecoOso: {fileID: 430436292}
+  respuestaCorrecta: FUE UN ACCIDENTE
+  equivalenciasVisuales:
+  - {fileID: 21300000, guid: 1608dc815585b684dbee8d992f4473bc, type: 3}
+  - {fileID: 21300000, guid: 113abeadddec2cc42839f1f13907001b, type: 3}
+  - {fileID: 21300000, guid: 79e7577164332a0459096fa103f47ad2, type: 3}
+  - {fileID: 21300000, guid: 064b97629a7b5bf43b3a789b3ee8c7f6, type: 3}
+  - {fileID: 21300000, guid: 7d53aef894022d9458579a76222a1322, type: 3}
+  - {fileID: 21300000, guid: 3f9d415c88217a743825a017ef53ee53, type: 3}
+  - {fileID: 21300000, guid: 2c94ddac2f9509f469a708ae6163f69e, type: 3}
+  - {fileID: 21300000, guid: b46afa3f169ebe640b4a3a9a34eb0aa3, type: 3}
+  - {fileID: 21300000, guid: 93a1b44da363568479aaf20d3fcb3b77, type: 3}
+  - {fileID: 21300000, guid: 978272dc6dd6ae2488468ea2a48f608e, type: 3}
+  fraseCompletaEncriptada: {fileID: 21300000, guid: 770e832aad179814980b54bc36a0a83d, type: 3}
+  cargarSpritesFinalesDesdeAssetsAcertijos: 0
+  carpetaCriptogramaRelativa: AssetsAcertijos/Acertijo4_Criptograma
+  nombreImagenFrase: Criptograma.jpeg
+  radioEquivalencias: 290
+  tamanoEquivalencia: {x: 116, y: 64}
+  tamanoFraseCompleta: {x: 680, y: 320}
+  usarDistribucionLateralesEnSala: 1
+  separacionHorizontalFilas: 190
+  alturaFilaSuperior: 255
+  alturaFilaInferior: -255
+  distanciaColumnaLateral: 390
+  separacionVerticalLateral: 132
+  posicionInputRespuesta: {x: 0, y: -360}
+  posicionBotonVerificar: {x: 0, y: -434}
+  posicionBotonCerrar: {x: 0, y: -500}
+  colorFondo: {r: 0.92, g: 0.89, b: 0.84, a: 0.98}
+  colorPlaceholderEquivalencia: {r: 0.25, g: 0.21, b: 0.17, a: 0.2}
+  colorPlaceholderFrase: {r: 0.2, g: 0.2, b: 0.2, a: 0.2}
+  colorInput: {r: 1, g: 1, b: 1, a: 0.95}
+  colorBoton: {r: 0.22, g: 0.2, b: 0.18, a: 1}
+  colorTexto: {r: 0.12, g: 0.1, b: 0.08, a: 1}
 --- !u!1 &989028238
 GameObject:
   m_ObjectHideFlags: 0
