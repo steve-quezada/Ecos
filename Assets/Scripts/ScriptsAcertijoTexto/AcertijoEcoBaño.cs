@@ -41,6 +41,18 @@ public class AcertijoEcoBaño : MonoBehaviour
     public Vector2 posicionVerificar = new Vector2(-105f, -305f);
     public Vector2 posicionCerrar    = new Vector2( 105f, -305f);
 
+    [Header("Layout Adaptativo")]
+    public bool ajustarLayoutSegunPantalla = true;
+
+    private Vector2 tamanoInput = new Vector2(980f, 110f);
+    private Vector2 tamanoBoton = new Vector2(320f, 90f);
+    private Vector2 tamanoContenedorPociones = new Vector2(1700f, 860f);
+    private float separacionY = 135f;
+    private float desplazamientoColumnasX = 540f;
+    private int tamanoFuenteInput = 42;
+    private int tamanoFuenteBoton = 42;
+    private float paddingInput = 14f;
+
     //Privados
     private GameManager      gameManager;
     private InputField       inputRespuesta;
@@ -119,9 +131,17 @@ public class AcertijoEcoBaño : MonoBehaviour
     {
     Transform raiz = transform;
 
+    if (ajustarLayoutSegunPantalla)
+    {
+        AplicarLayoutResponsivo();
+    }
+
     // Fondo
     Image fondo = GetComponent<Image>();
     if (fondo != null) fondo.color = colorFondo;
+
+        int cantidad = Mathf.Min(spritesFrente.Count, spritesReverso.Count);
+        cantidad = Mathf.Min(cantidad, 7);
 
         // Receta médica
         CrearReceta(raiz);
@@ -133,11 +153,9 @@ public class AcertijoEcoBaño : MonoBehaviour
         contenedorPociones.anchorMin = contenedorPociones.anchorMax = new Vector2(0.5f, 0.5f);
         contenedorPociones.pivot     = new Vector2(0.5f, 0.5f);
         contenedorPociones.anchoredPosition = posicionFila;
-        contenedorPociones.sizeDelta = new Vector2(separacionX * 7, tamanoPociones.y);
+        contenedorPociones.sizeDelta = tamanoContenedorPociones;
 
-        // Crear 7 slots de pociones
-        int cantidad = Mathf.Min(spritesFrente.Count, spritesReverso.Count);
-        cantidad = Mathf.Min(cantidad, 7);
+        // Crear slots de pociones
 
         for (int i = 0; i < cantidad; i++)
         {
@@ -179,7 +197,7 @@ public class AcertijoEcoBaño : MonoBehaviour
 
     void CrearSlotPocion(int indice, int total)
     {
-        float offsetX = (indice - (total - 1) / 2f) * separacionX;
+        Vector2 posicionSlot = ObtenerPosicionSlot(indice, total);
 
         // GameObject de la poción
         GameObject go = new GameObject("Pocion_" + indice,
@@ -191,7 +209,7 @@ public class AcertijoEcoBaño : MonoBehaviour
         RectTransform rect = go.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot     = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = new Vector2(offsetX, 0f);
+        rect.anchoredPosition = posicionSlot;
         rect.sizeDelta = tamanoPociones;
 
         Image img = go.GetComponent<Image>();
@@ -211,6 +229,24 @@ public class AcertijoEcoBaño : MonoBehaviour
         btn.onClick.AddListener(() => slots[idx].Voltear());
     }
 
+    Vector2 ObtenerPosicionSlot(int indice, int total)
+    {
+        int cantidadIzquierda = Mathf.Min(4, total);
+        int cantidadDerecha = Mathf.Max(0, total - cantidadIzquierda);
+
+        if (indice < cantidadIzquierda)
+        {
+            float yInicioIzquierda = (cantidadIzquierda - 1) * 0.5f * separacionY;
+            float y = yInicioIzquierda - indice * separacionY;
+            return new Vector2(-desplazamientoColumnasX, y);
+        }
+
+        int indiceDerecha = indice - cantidadIzquierda;
+        float yInicioDerecha = (cantidadDerecha - 1) * 0.5f * separacionY;
+        float yDerecha = yInicioDerecha - indiceDerecha * separacionY;
+        return new Vector2(desplazamientoColumnasX, yDerecha);
+    }
+
     InputField CrearInputField(Transform parent, Font fuente)
     {
         GameObject go = new GameObject("InputRespuesta",
@@ -221,25 +257,25 @@ public class AcertijoEcoBaño : MonoBehaviour
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot     = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = posicionInput;
-        rect.sizeDelta = new Vector2(1500f, 150f);
+        rect.sizeDelta = tamanoInput;
 
         go.GetComponent<Image>().color = colorInput;
 
         // Texto
         GameObject textoGO = new GameObject("Text", typeof(RectTransform), typeof(Text));
         textoGO.transform.SetParent(go.transform, false);
-        SetFullRect(textoGO.GetComponent<RectTransform>(), 14f);
+        SetFullRect(textoGO.GetComponent<RectTransform>(), paddingInput);
         Text texto = textoGO.GetComponent<Text>();
-        texto.font = fuente; texto.fontSize = 60;
+        texto.font = fuente; texto.fontSize = tamanoFuenteInput;
         texto.alignment = TextAnchor.MiddleLeft;
         texto.color = colorTexto;
 
         // Placeholder
         GameObject phGO = new GameObject("Placeholder", typeof(RectTransform), typeof(Text));
         phGO.transform.SetParent(go.transform, false);
-        SetFullRect(phGO.GetComponent<RectTransform>(), 14f);
+        SetFullRect(phGO.GetComponent<RectTransform>(), paddingInput);
         Text ph = phGO.GetComponent<Text>();
-        ph.font = fuente; ph.fontSize = 60;
+        ph.font = fuente; ph.fontSize = Mathf.Max(24, tamanoFuenteInput - 4);
         ph.alignment = TextAnchor.MiddleLeft;
         ph.color = new Color(colorTexto.r, colorTexto.g, colorTexto.b, 0.4f);
         ph.text = "Escribe la frase en orden...";
@@ -262,7 +298,7 @@ public class AcertijoEcoBaño : MonoBehaviour
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot     = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = pos;
-        rect.sizeDelta = new Vector2(570f, 150f);
+        rect.sizeDelta = tamanoBoton;
 
         go.GetComponent<Image>().color = colorBoton;
 
@@ -270,12 +306,66 @@ public class AcertijoEcoBaño : MonoBehaviour
         textoGO.transform.SetParent(go.transform, false);
         SetFullRect(textoGO.GetComponent<RectTransform>(), 0f);
         Text t = textoGO.GetComponent<Text>();
-        t.font = fuente; t.fontSize = 60;
+        t.font = fuente; t.fontSize = tamanoFuenteBoton;
         t.alignment = TextAnchor.MiddleCenter;
         t.color = Color.white;
         t.text  = label;
 
         return go.GetComponent<Button>();
+    }
+
+    void AplicarLayoutResponsivo()
+    {
+        RectTransform rectPanel = transform as RectTransform;
+        float anchoPantalla = rectPanel != null ? rectPanel.rect.width : 0f;
+        float altoPantalla = rectPanel != null ? rectPanel.rect.height : 0f;
+
+        if (anchoPantalla <= 1f || altoPantalla <= 1f)
+        {
+            anchoPantalla = Screen.width;
+            altoPantalla = Screen.height;
+        }
+
+        float escalaAncho = Mathf.Clamp(anchoPantalla / 1920f, 0.6f, 1.3f);
+        float escalaAlto = Mathf.Clamp(altoPantalla / 1080f, 0.6f, 1.3f);
+        float escala = Mathf.Min(escalaAncho, escalaAlto);
+
+        tamanoPociones = new Vector2(102f * escala, 162f * escala);
+        separacionY = Mathf.Clamp(tamanoPociones.y * 1.04f, 108f, 185f);
+        tamanoContenedorPociones = new Vector2(anchoPantalla * 0.96f, altoPantalla * 0.74f);
+
+        tamanoReceta = new Vector2(
+            Mathf.Clamp(anchoPantalla * 0.70f, 640f, 1280f),
+            Mathf.Clamp(altoPantalla * 0.66f, 430f, 800f));
+
+        posicionReceta = new Vector2(
+            0f,
+            Mathf.Clamp(altoPantalla * 0.04f, 10f, 70f));
+
+        posicionFila = new Vector2(
+            0f,
+            -altoPantalla * 0.01f);
+
+        float margenColumnas = Mathf.Clamp(anchoPantalla * 0.03f, 30f, 62f);
+        desplazamientoColumnasX = tamanoReceta.x * 0.5f + tamanoPociones.x * 0.65f + margenColumnas;
+        float maxOffset = anchoPantalla * 0.5f - tamanoPociones.x * 0.55f - 16f;
+        desplazamientoColumnasX = Mathf.Min(desplazamientoColumnasX, maxOffset);
+
+        tamanoInput = new Vector2(
+            Mathf.Clamp(anchoPantalla * 0.52f, 640f, 1080f),
+            Mathf.Clamp(altoPantalla * 0.090f, 70f, 116f));
+
+        tamanoBoton = new Vector2(
+            Mathf.Clamp(anchoPantalla * 0.19f, 230f, 380f),
+            Mathf.Clamp(altoPantalla * 0.072f, 58f, 90f));
+
+        posicionInput = new Vector2(0f, -altoPantalla * 0.35f);
+        posicionVerificar = new Vector2(-anchoPantalla * 0.11f, -altoPantalla * 0.44f);
+        posicionCerrar = new Vector2(anchoPantalla * 0.11f, -altoPantalla * 0.44f);
+
+        tamanoFuenteInput = Mathf.RoundToInt(Mathf.Clamp(altoPantalla * 0.037f, 24f, 42f));
+        tamanoFuenteBoton = Mathf.RoundToInt(Mathf.Clamp(altoPantalla * 0.034f, 22f, 38f));
+        paddingInput = Mathf.Clamp(altoPantalla * 0.009f, 8f, 14f);
     }
 
     void SetFullRect(RectTransform r, float padding)
