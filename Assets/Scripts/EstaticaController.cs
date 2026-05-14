@@ -6,6 +6,9 @@ public class EstaticaController : MonoBehaviour
 {
     private const string EscenaPantallaPerder = "PantallaPerder";
     private const float DuracionFundidoMuerte = 2.5f;
+    private const float VolumenBaseEstaticaMinimoGlobal = 1.0f;
+    private const float VolumenAparicionMinimoGlobal = 1.0f;
+    private const float MultiplicadorAparicionMinimoGlobal = 1.6f;
 
     [Header("Límites de la Habitación")]
     public float limiteMinX = -7f;
@@ -45,6 +48,10 @@ public class EstaticaController : MonoBehaviour
     [Range(0f, 1f)] public float volumenAparicion = 1f;
     public AudioClip sonidoGrito;
     [Range(0f, 1f)] public float volumenGrito = 1f;
+    [Range(0f, 1f)] public float volumenBaseFuenteEstatica = 0.9f;
+    [Range(0f, 1f)] public float volumenMinimoAparicion = 0.9f;
+    [Range(0f, 1f)] public float volumenMinimoGrito = 0.9f;
+    [Range(1f, 2f)] public float multiplicadorPrioridadAparicion = 1.6f;
     private bool yaAtrapado = false;
 
     private Transform jugador;
@@ -252,6 +259,8 @@ public class EstaticaController : MonoBehaviour
         fuenteAudio.playOnAwake = false;
         fuenteAudio.loop = false;
         fuenteAudio.spatialBlend = 0f;
+        float volumenBaseForzado = Mathf.Max(volumenBaseFuenteEstatica, VolumenBaseEstaticaMinimoGlobal);
+        fuenteAudio.volume = Mathf.Max(fuenteAudio.volume, volumenBaseForzado);
     }
 
     void ReproducirSonidoAparicion()
@@ -261,13 +270,17 @@ public class EstaticaController : MonoBehaviour
             return;
         }
 
+        float volumenBaseAparicion = Mathf.Max(volumenAparicion, volumenMinimoAparicion, VolumenAparicionMinimoGlobal);
+        float multiplicador = Mathf.Max(multiplicadorPrioridadAparicion, MultiplicadorAparicionMinimoGlobal);
+        float volumenFinalAparicion = Mathf.Clamp(volumenBaseAparicion * multiplicador, 0f, 2f);
+
         if (fuenteAudio != null)
         {
-            fuenteAudio.PlayOneShot(sonidoAparicion, volumenAparicion);
+            fuenteAudio.PlayOneShot(sonidoAparicion, volumenFinalAparicion);
         }
         else
         {
-            AudioSource.PlayClipAtPoint(sonidoAparicion, transform.position, volumenAparicion);
+            AudioSource.PlayClipAtPoint(sonidoAparicion, transform.position, volumenFinalAparicion);
         }
     }
 
@@ -289,13 +302,15 @@ public class EstaticaController : MonoBehaviour
 
         if (sonidoGrito != null)
         {
+            float volumenFinalGrito = Mathf.Clamp01(Mathf.Max(volumenGrito, volumenMinimoGrito));
+
             if (fuenteAudio != null)
             {
-                fuenteAudio.PlayOneShot(sonidoGrito, volumenGrito);
+                fuenteAudio.PlayOneShot(sonidoGrito, volumenFinalGrito);
             }
             else
             {
-                AudioSource.PlayClipAtPoint(sonidoGrito, transform.position, volumenGrito);
+                AudioSource.PlayClipAtPoint(sonidoGrito, transform.position, volumenFinalGrito);
             }
         }
 

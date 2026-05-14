@@ -36,8 +36,6 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
     [SerializeField] private float separacionHorizontalFilas = 190f;
     [SerializeField] private float alturaFilaSuperior = 255f;
     [SerializeField] private float alturaFilaInferior = -255f;
-    [SerializeField] private float distanciaColumnaLateral = 390f;
-    [SerializeField] private float separacionVerticalLateral = 132f;
     [SerializeField] private Vector2 posicionInputRespuesta = new Vector2(0f, -360f);
     [SerializeField] private Vector2 posicionBotonVerificar = new Vector2(0f, -434f);
     [SerializeField] private Vector2 posicionBotonCerrar = new Vector2(0f, -500f);

@@ -18,6 +18,7 @@ public class EsconditeTrampa : MonoBehaviour
     public AudioSource fuenteAudio;
     public AudioClip sonidoQuemaduraOGrito;
     [Range(0f, 1f)] public float volumenGrito = 1f;
+    [Range(0f, 1f)] public float normalizacionVolumenGrito = 0.85f;
 
     private MiloController milo;
 
@@ -94,6 +95,7 @@ public class EsconditeTrampa : MonoBehaviour
     {
         AudioClip clip = sonidoQuemaduraOGrito;
         AudioSource fuente = fuenteAudio;
+        float volumenFinal = Mathf.Clamp01(volumenGrito * normalizacionVolumenGrito);
 
         EstaticaController estatica = FindObjectOfType<EstaticaController>();
         if (clip == null && estatica != null)
@@ -114,11 +116,11 @@ public class EsconditeTrampa : MonoBehaviour
 
         if (fuente != null)
         {
-            fuente.PlayOneShot(clip, volumenGrito);
+            fuente.PlayOneShot(clip, volumenFinal);
         }
         else
         {
-            AudioSource.PlayClipAtPoint(clip, transform.position, volumenGrito);
+            AudioSource.PlayClipAtPoint(clip, transform.position, volumenFinal);
         }
     }
 }

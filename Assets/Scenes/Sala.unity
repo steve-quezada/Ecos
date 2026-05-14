@@ -5083,8 +5083,6 @@ MonoBehaviour:
   separacionHorizontalFilas: 190
   alturaFilaSuperior: 255
   alturaFilaInferior: -255
-  distanciaColumnaLateral: 390
-  separacionVerticalLateral: 132
   posicionInputRespuesta: {x: 0, y: -360}
   posicionBotonVerificar: {x: 0, y: -434}
   posicionBotonCerrar: {x: 0, y: -500}
@@ -7129,7 +7127,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1554144909}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -7154,7 +7152,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.019979, y: 0.08062661}
+  m_Offset: {x: -0.011169434, y: 0.62374055}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -7165,7 +7163,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 7.3528347, y: 7.3964233}
+  m_Size: {x: 3.089054, y: 3.7610047}
   m_EdgeRadius: 0
 --- !u!212 &1554144915
 SpriteRenderer:

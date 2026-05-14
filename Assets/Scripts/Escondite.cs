@@ -18,6 +18,7 @@ public class Escondite : MonoBehaviour
     public AudioSource fuenteAudioMuerte;
     public AudioClip sonidoGritoMuerte;
     [Range(0f, 1f)] public float volumenGritoMuerte = 1f;
+    [Range(0f, 1f)] public float normalizacionVolumenGritoMuerte = 0.85f;
 
     private GameManager gameManager;
     private bool enZonaDeEscondite = false;
@@ -150,6 +151,7 @@ public class Escondite : MonoBehaviour
     {
         AudioClip clip = sonidoGritoMuerte;
         AudioSource fuente = fuenteAudioMuerte;
+        float volumenFinal = Mathf.Clamp01(volumenGritoMuerte * normalizacionVolumenGritoMuerte);
 
         EstaticaController estatica = FindObjectOfType<EstaticaController>();
         if (clip == null && estatica != null)
@@ -170,11 +172,11 @@ public class Escondite : MonoBehaviour
 
         if (fuente != null)
         {
-            fuente.PlayOneShot(clip, volumenGritoMuerte);
+            fuente.PlayOneShot(clip, volumenFinal);
         }
         else
         {
-            AudioSource.PlayClipAtPoint(clip, transform.position, volumenGritoMuerte);
+            AudioSource.PlayClipAtPoint(clip, transform.position, volumenFinal);
         }
     }
 
