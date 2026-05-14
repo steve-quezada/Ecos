@@ -17,9 +17,11 @@ public class AcertijoEcoTexto : MonoBehaviour
     [Header("Interacción")]
     public KeyCode teclaInteraccion = KeyCode.E;
     private bool jugadorEnRango = false;
+    private GameManager gameManager;
 
     void Start()
     {
+        gameManager = FindObjectOfType<GameManager>();
         if (panelAcertijo != null) panelAcertijo.SetActive(false);
     }
 
@@ -69,6 +71,11 @@ public class AcertijoEcoTexto : MonoBehaviour
         if (respuestaJugador == respuestaSecreta)
         {
             Debug.Log("¡Correcto! Milo recogió el Eco.");
+
+            if (gameManager != null)
+            {
+                gameManager.RegistrarEcoRecolectado();
+            }
             
             // 1. Apagamos la UI
             panelAcertijo.SetActive(false);
