@@ -77,6 +77,16 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
 
     void OnEnable()
     {
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        if (gameManager != null)
+        {
+            gameManager.OcultarHudProgresoEnMinijuego();
+        }
+
         if (uiObjetosObligatorios != null) uiObjetosObligatorios.SetActive(false);
         if (uiEco != null) uiEco.SetActive(false);
 
@@ -86,6 +96,16 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
 
     void OnDisable()
     {
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        if (gameManager != null)
+        {
+            gameManager.RestaurarHudProgresoTrasMinijuego();
+        }
+
         if (uiObjetosObligatorios != null) uiObjetosObligatorios.SetActive(true);
         if (uiEco != null) uiEco.SetActive(true);
     }

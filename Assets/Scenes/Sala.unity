@@ -261,6 +261,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: f07ee9c44297e3a4683ac70d00fc5779, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &64072312
 AudioSource:
   m_ObjectHideFlags: 0
@@ -594,6 +595,7 @@ MonoBehaviour:
   fuenteAudioMuerte: {fileID: 0}
   sonidoGritoMuerte: {fileID: 0}
   volumenGritoMuerte: 1
+  normalizacionVolumenGritoMuerte: 0.85
 --- !u!212 &90104669
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -655,7 +657,7 @@ Transform:
   m_GameObject: {fileID: 90104666}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.5, y: 4.85, z: 0}
+  m_LocalPosition: {x: 5.12, y: 4.23, z: 0}
   m_LocalScale: {x: 0.506888, y: 0.46241114, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -945,7 +947,7 @@ Transform:
   m_GameObject: {fileID: 115352827}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
-  m_LocalPosition: {x: 0.61, y: 1.86, z: 0}
+  m_LocalPosition: {x: 0.57, y: 1.53, z: 0}
   m_LocalScale: {x: 0.42, y: 0.36, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1111,7 +1113,7 @@ Transform:
   m_GameObject: {fileID: 129619232}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.9978703, w: 0.06522901}
-  m_LocalPosition: {x: 0.18, y: -0.564, z: 0.08464536}
+  m_LocalPosition: {x: -0.02, y: -0.72, z: 0.08464536}
   m_LocalScale: {x: 0.49256688, y: 0.384525, z: 0.15147}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1131,6 +1133,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 53432307d256db14d8442d7bff52993d, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &129619236
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1960,6 +1963,7 @@ MonoBehaviour:
   fuenteAudioMuerte: {fileID: 0}
   sonidoGritoMuerte: {fileID: 0}
   volumenGritoMuerte: 1
+  normalizacionVolumenGritoMuerte: 0.85
 --- !u!212 &207466901
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4557,6 +4561,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 8f4b0191a32795943a3d90450b642655, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &958147686
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5478,7 +5483,7 @@ Transform:
   m_GameObject: {fileID: 1102012877}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.47, y: 4.49, z: 0}
+  m_LocalPosition: {x: 0.45, y: 3.94, z: 0}
   m_LocalScale: {x: 0.46, y: 0.36, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5988,6 +5993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 4a887afcb58d54ab796b8f07dacc736c, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &1339869180
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7011,6 +7017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 421f6c5281211f547b7f0d3d08fd14be, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &1554144912
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7632,6 +7639,10 @@ MonoBehaviour:
   volumenAparicion: 1
   sonidoGrito: {fileID: 8300000, guid: 81bd9c8788fef4dde9ce94db7e5e334f, type: 3}
   volumenGrito: 1
+  volumenBaseFuenteEstatica: 0.9
+  volumenMinimoAparicion: 0.9
+  volumenMinimoGrito: 0.9
+  multiplicadorPrioridadAparicion: 1.6
 --- !u!82 &1854654475
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7949,6 +7960,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 669798300534f184eb7758b07e60365a, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &1956924507
 AudioSource:
   m_ObjectHideFlags: 0
@@ -8205,6 +8217,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 8d215742b04602546b0afa8dd23f33bf, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &1992099276
 AudioSource:
   m_ObjectHideFlags: 0
@@ -8564,6 +8577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sonidoTrampa: {fileID: 8300000, guid: 4a887afcb58d54ab796b8f07dacc736c, type: 3}
   cantidadDeRuido: 1
+  volumenMaximoMetal: 0.102
 --- !u!82 &2141579309
 AudioSource:
   m_ObjectHideFlags: 0

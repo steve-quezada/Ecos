@@ -76,6 +76,9 @@ public class AcertijoEcoBaño : MonoBehaviour
     {
         if (gameManager == null)
             gameManager = FindObjectOfType<GameManager>();
+
+        if (gameManager != null)
+            gameManager.OcultarHudProgresoEnMinijuego();
  
         if (!interfazConstruida)
         {
@@ -89,6 +92,16 @@ public class AcertijoEcoBaño : MonoBehaviour
         Time.timeScale = 0f;
         if (milo != null) milo.puedeMoverse = false;
     }
+
+    void OnDisable()
+    {
+        if (gameManager == null)
+            gameManager = FindObjectOfType<GameManager>();
+
+        if (gameManager != null)
+            gameManager.RestaurarHudProgresoTrasMinijuego();
+    }
+
     public void CerrarPanelSinResolver()
     {
         DescongelarJuego();

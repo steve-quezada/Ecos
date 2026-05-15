@@ -41,6 +41,7 @@ public class GameManager : MonoBehaviour
     private Sprite spriteLinea;
     private static Sprite spriteLineaCompartido;
     private bool ecoRecolectado = false;
+    private int bloqueosHudMinijuego = 0;
 
     [Header("Compatibilidad (Legacy)")]
     public bool tieneMochila = false;
@@ -604,5 +605,40 @@ public class GameManager : MonoBehaviour
     {
         ActualizarLineasObjetos();
         ActualizarLineaEco();
+    }
+
+    public void OcultarHudProgresoEnMinijuego()
+    {
+        ResolverReferenciasUI();
+        bloqueosHudMinijuego++;
+        AplicarVisibilidadHudProgreso(false);
+    }
+
+    public void RestaurarHudProgresoTrasMinijuego()
+    {
+        ResolverReferenciasUI();
+
+        if (bloqueosHudMinijuego > 0)
+        {
+            bloqueosHudMinijuego--;
+        }
+
+        if (bloqueosHudMinijuego == 0)
+        {
+            AplicarVisibilidadHudProgreso(true);
+        }
+    }
+
+    private void AplicarVisibilidadHudProgreso(bool visible)
+    {
+        if (iconoObjetosObligatorios != null)
+        {
+            iconoObjetosObligatorios.gameObject.SetActive(visible);
+        }
+
+        if (iconoEco != null)
+        {
+            iconoEco.gameObject.SetActive(visible);
+        }
     }
 }

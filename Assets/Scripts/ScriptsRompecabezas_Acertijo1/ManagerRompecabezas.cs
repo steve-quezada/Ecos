@@ -27,6 +27,16 @@ public class ManagerRompecabezas : MonoBehaviour
     // OnEnable se ejecuta automáticamente en cuanto el Panel de este script se ACTIVA
     void OnEnable()
     {
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        if (gameManager != null)
+        {
+            gameManager.OcultarHudProgresoEnMinijuego();
+        }
+
         if (uiObjetosObligatorios != null) uiObjetosObligatorios.SetActive(false);
         if (uiEco != null) uiEco.SetActive(false);
         AjustarPiezasDentroDeAreaVisible();
@@ -36,6 +46,16 @@ public class ManagerRompecabezas : MonoBehaviour
     // OnDisable se ejecuta automáticamente en cuanto el Panel de este script se DESACTIVA (lo termines o no)
     void OnDisable()
     {
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        if (gameManager != null)
+        {
+            gameManager.RestaurarHudProgresoTrasMinijuego();
+        }
+
         if (uiObjetosObligatorios != null) uiObjetosObligatorios.SetActive(true);
         if (uiEco != null) uiEco.SetActive(true);
     }

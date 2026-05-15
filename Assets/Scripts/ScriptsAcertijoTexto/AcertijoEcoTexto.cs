@@ -55,6 +55,16 @@ public class AcertijoEcoTexto : MonoBehaviour
 
     void AbrirPanel()
     {
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        if (gameManager != null)
+        {
+            gameManager.OcultarHudProgresoEnMinijuego();
+        }
+
         panelAcertijo.SetActive(true);
         cuadroDeTexto.text = ""; 
         
@@ -90,6 +100,11 @@ public class AcertijoEcoTexto : MonoBehaviour
             Time.timeScale = 1f;
             if (milo != null) milo.puedeMoverse = true;
 
+            if (gameManager != null)
+            {
+                gameManager.RestaurarHudProgresoTrasMinijuego();
+            }
+
             // 4. Destruimos el objeto de la escena
             if (ecoEnEscena != null) Destroy(ecoEnEscena);
         }
@@ -116,5 +131,10 @@ public class AcertijoEcoTexto : MonoBehaviour
         // DESCONGELAMIENTO: Restauramos el tiempo y a Milo
         Time.timeScale = 1f;
         if (milo != null) milo.puedeMoverse = true;
+
+        if (gameManager != null)
+        {
+            gameManager.RestaurarHudProgresoTrasMinijuego();
+        }
     }
 }
