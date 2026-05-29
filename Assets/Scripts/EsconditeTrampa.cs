@@ -12,8 +12,11 @@ public class EsconditeTrampa : MonoBehaviour
     private bool jugadorEnRango = false;
     private bool yaActivado = false;
 
+    [Header("UI Flotante")]
+    [Tooltip("Arrastra aquí el objeto 3D de la [E]. Se quedará siempre visible.")]
+    public GameObject indicadorTeclaE; 
+
     [Header("Efectos de Muerte")]
-    [Tooltip("Arrastra aquí el dibujo del fuego por si quieres que aparezca de golpe")]
     public GameObject efectoFuegoVisual; 
     public AudioSource fuenteAudio;
     public AudioClip sonidoQuemaduraOGrito;
@@ -24,7 +27,6 @@ public class EsconditeTrampa : MonoBehaviour
 
     void Start()
     {
-        // Nos aseguramos de que el fuego empiece apagado
         if (efectoFuegoVisual != null)
         {
             efectoFuegoVisual.SetActive(false);
@@ -33,10 +35,13 @@ public class EsconditeTrampa : MonoBehaviour
 
     void Update()
     {
-        // Si Milo está cerca, presiona la tecla y la trampa no se ha activado aún
         if (jugadorEnRango && !yaActivado && Input.GetKeyDown(teclaInteraccion))
         {
             yaActivado = true;
+            
+            // Apagamos la [E] porque ya activó la trampa
+            if (indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
+            
             StartCoroutine(SecuenciaMuerteFuego());
         }
     }
@@ -63,19 +68,9 @@ public class EsconditeTrampa : MonoBehaviour
     {
         Debug.Log("¡Muerte por trampa! Milo se escondió en el fuego.");
 
-        // 1. Destruimos a Milo por completo (desaparece de la pantalla al instante)
-        if (milo != null)
-        {
-            Destroy(milo.gameObject);
-        }
+        if (milo != null) Destroy(milo.gameObject);
+        if (efectoFuegoVisual != null) efectoFuegoVisual.SetActive(true);
 
-        // 2. Encendemos las llamas visuales
-        if (efectoFuegoVisual != null)
-        {
-            efectoFuegoVisual.SetActive(true);
-        }
-
-        // 3. Reproducimos el grito o sonido de quemadura
         ReproducirGritoTrampa();
 
         if (!Application.CanStreamedLevelBeLoaded(EscenaPantallaTrampa))
@@ -84,10 +79,7 @@ public class EsconditeTrampa : MonoBehaviour
             yield break;
         }
 
-        // 4. Fundido progresivo a negro
         yield return EfectoMuertePantalla.FundirANegro(DuracionFundidoMuerte);
-
-        // 5. ¡Game Over! Mandamos a la pantalla de trampa
         SceneManager.LoadScene(EscenaPantallaTrampa);
     }
 
@@ -98,15 +90,8 @@ public class EsconditeTrampa : MonoBehaviour
         float volumenFinal = Mathf.Clamp01(volumenGrito * normalizacionVolumenGrito);
 
         EstaticaController estatica = FindObjectOfType<EstaticaController>();
-        if (clip == null && estatica != null)
-        {
-            clip = estatica.sonidoGrito;
-        }
-
-        if (fuente == null && estatica != null)
-        {
-            fuente = estatica.fuenteAudio;
-        }
+        if (clip == null && estatica != null) clip = estatica.sonidoGrito;
+        if (fuente == null && estatica != null) fuente = estatica.fuenteAudio;
 
         if (clip == null)
         {
@@ -114,13 +99,7 @@ public class EsconditeTrampa : MonoBehaviour
             return;
         }
 
-        if (fuente != null)
-        {
-            fuente.PlayOneShot(clip, volumenFinal);
-        }
-        else
-        {
-            AudioSource.PlayClipAtPoint(clip, transform.position, volumenFinal);
-        }
+        if (fuente != null) fuente.PlayOneShot(clip, volumenFinal);
+        else AudioSource.PlayClipAtPoint(clip, transform.position, volumenFinal);
     }
 }

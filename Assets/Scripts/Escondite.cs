@@ -1,4 +1,4 @@
-using System.Collections; // Necesario para usar Corrutinas (el temporizador)
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,6 +9,10 @@ public class Escondite : MonoBehaviour
 
     [Header("Configuración de Salida")]
     public Vector2 offsetSalida = new Vector2(1.5f, 0f); 
+
+    [Header("UI Flotante")]
+    [Tooltip("Arrastra aquí el objeto 3D de la [E]. Se quedará siempre visible.")]
+    public GameObject indicadorTeclaE; 
 
     [Header("Modo Trampa")]
     public bool esTrampaMortal = false;
@@ -23,12 +27,10 @@ public class Escondite : MonoBehaviour
     private GameManager gameManager;
     private bool enZonaDeEscondite = false;
     
-    // Referencias al jugador
     private Transform jugadorTransform;
     private MiloController miloController;
     private SpriteRenderer miloSprite;
 
-    // Esta variable guarda nuestro temporizador
     private Coroutine rutinaReduccionRuido;
     private bool muerteTrampaEnCurso = false;
 
@@ -72,12 +74,13 @@ public class Escondite : MonoBehaviour
         jugadorTransform.position = transform.position;
         miloSprite.enabled = false;
 
-        // Si ya había un reloj corriendo por error, lo matamos primero
+        // Apagamos la [E] mientras Milo está escondido
+        if (indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
+
         if (rutinaReduccionRuido != null) 
         {
             StopCoroutine(rutinaReduccionRuido);
         }
-        // Iniciamos el temporizador de reducción de ruido
         rutinaReduccionRuido = StartCoroutine(ReducirRuidoPorSegundo());
 
         Debug.Log("Milo se escondió. Iniciando reducción de ruido...");
@@ -90,7 +93,9 @@ public class Escondite : MonoBehaviour
         miloController.puedeMoverse = true;
         miloSprite.enabled = true;
 
-        // Detenemos el temporizador en el instante que Milo sale
+        // Prendemos la [E] de nuevo porque Milo ya salió
+        if (indicadorTeclaE != null) indicadorTeclaE.SetActive(true);
+
         if (rutinaReduccionRuido != null)
         {
             StopCoroutine(rutinaReduccionRuido);
@@ -102,12 +107,12 @@ public class Escondite : MonoBehaviour
 
     void ActivarTrampaMortal()
     {
-        if (muerteTrampaEnCurso)
-        {
-            return;
-        }
+        if (muerteTrampaEnCurso) return;
 
         muerteTrampaEnCurso = true;
+        
+        // Apagamos la [E] porque el escondite resultó ser falso
+        if (indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
 
         if (rutinaReduccionRuido != null)
         {
@@ -117,15 +122,8 @@ public class Escondite : MonoBehaviour
 
         gameManager.miloOculto = false;
 
-        if (miloController != null)
-        {
-            miloController.puedeMoverse = false;
-        }
-
-        if (ocultarSpriteAlMorir && miloSprite != null)
-        {
-            miloSprite.enabled = false;
-        }
+        if (miloController != null) miloController.puedeMoverse = false;
+        if (ocultarSpriteAlMorir && miloSprite != null) miloSprite.enabled = false;
 
         enZonaDeEscondite = false;
         Debug.Log("\u00a1TRAMPA! Ese escondite era falso. Milo murió al instante.");
@@ -154,15 +152,8 @@ public class Escondite : MonoBehaviour
         float volumenFinal = Mathf.Clamp01(volumenGritoMuerte * normalizacionVolumenGritoMuerte);
 
         EstaticaController estatica = FindObjectOfType<EstaticaController>();
-        if (clip == null && estatica != null)
-        {
-            clip = estatica.sonidoGrito;
-        }
-
-        if (fuente == null && estatica != null)
-        {
-            fuente = estatica.fuenteAudio;
-        }
+        if (clip == null && estatica != null) clip = estatica.sonidoGrito;
+        if (fuente == null && estatica != null) fuente = estatica.fuenteAudio;
 
         if (clip == null)
         {
@@ -170,30 +161,16 @@ public class Escondite : MonoBehaviour
             return;
         }
 
-        if (fuente != null)
-        {
-            fuente.PlayOneShot(clip, volumenFinal);
-        }
-        else
-        {
-            AudioSource.PlayClipAtPoint(clip, transform.position, volumenFinal);
-        }
+        if (fuente != null) fuente.PlayOneShot(clip, volumenFinal);
+        else AudioSource.PlayClipAtPoint(clip, transform.position, volumenFinal);
     }
 
-    // El temporizador que se ejecuta cada 1 segundo
     IEnumerator ReducirRuidoPorSegundo()
     {
-        // Mientras Milo siga oculto, este ciclo se repetirá
         while (gameManager.miloOculto)
         {
-            // Espera exactamente 1 segundo real
             yield return new WaitForSeconds(1f);
-
-            // Le avisa al Manager que baje 1 punto
-            if (ManagerRuido.instancia != null)
-            {
-                ManagerRuido.instancia.ReducirRuido(1f);
-            }
+            if (ManagerRuido.instancia != null) ManagerRuido.instancia.ReducirRuido(1f);
         }
     }
 
@@ -202,7 +179,6 @@ public class Escondite : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             enZonaDeEscondite = true;
-            
             if (jugadorTransform == null)
             {
                 jugadorTransform = collision.transform;
@@ -214,9 +190,6 @@ public class Escondite : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
-        {
-            enZonaDeEscondite = false;
-        }
+        if (collision.CompareTag("Player")) enZonaDeEscondite = false;
     }
 }
