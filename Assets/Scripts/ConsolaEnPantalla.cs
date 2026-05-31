@@ -8,6 +8,10 @@ public class ConsolaEnPantalla : MonoBehaviour
     
     [Header("Configuración")]
     public int maxLineas = 8; // Para que no tape toda la pantalla
+    public bool mostrarLogsInternos = false;
+
+    [Header("Estilo de Mensajes")]
+    [SerializeField] private Color colorMensajesJugador = new Color(0.45f, 0.98f, 0.62f, 1f);
     
     private string registroLogs = "";
 
@@ -26,18 +30,40 @@ public class ConsolaEnPantalla : MonoBehaviour
     // Esta función recibe en automático cada Debug.Log de tu juego
     void CapturarLog(string mensaje, string rastro, LogType tipo)
     {
-        // Si el mensaje es un error rojo, le ponemos una etiqueta de color para distinguirlo
-        if (tipo == LogType.Error || tipo == LogType.Exception)
+        if (string.IsNullOrWhiteSpace(mensaje))
         {
-            mensaje = "<color=red>" + mensaje + "</color>";
+            return;
         }
-        else if (tipo == LogType.Warning)
+
+        string mensajeLimpio = mensaje.Trim();
+        string prefijoUsuario = MensajeriaJugador.Prefijo + " ";
+        bool esMensajeUsuario = mensajeLimpio.StartsWith(prefijoUsuario);
+
+        if (!esMensajeUsuario && !mostrarLogsInternos)
         {
-            mensaje = "<color=yellow>" + mensaje + "</color>";
+            return;
+        }
+
+        if (esMensajeUsuario)
+        {
+            mensajeLimpio = mensajeLimpio.Substring(prefijoUsuario.Length);
+            string colorHex = ColorUtility.ToHtmlStringRGBA(colorMensajesJugador);
+            mensajeLimpio = "<color=#" + colorHex + ">" + mensajeLimpio + "</color>";
+        }
+        else
+        {
+            if (tipo == LogType.Error || tipo == LogType.Exception)
+            {
+                mensajeLimpio = "<color=red>" + mensajeLimpio + "</color>";
+            }
+            else if (tipo == LogType.Warning)
+            {
+                mensajeLimpio = "<color=yellow>" + mensajeLimpio + "</color>";
+            }
         }
 
         // Agregamos el nuevo mensaje a nuestra lista
-        registroLogs += mensaje + "\n";
+        registroLogs += mensajeLimpio + "\n";
 
         // Magia para borrar las líneas viejas y que no se llene la memoria
         string[] lineas = registroLogs.Split('\n');

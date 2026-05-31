@@ -21,7 +21,7 @@ public class EcoInteractuable : MonoBehaviour
             }
             else
             {
-                Debug.Log("Está muy oscuro... no alcanzo a distinguir qué es esto.");
+                MensajeriaJugador.Mostrar("Está muy oscuro. Enciende la linterna para inspeccionar.");
             }
         }
     }
@@ -39,7 +39,7 @@ public class EcoInteractuable : MonoBehaviour
             panelRompecabezas.SetActive(true); 
         }
         
-        Debug.Log("Acertijo abierto. El tiempo está congelado.");
+        MensajeriaJugador.Mostrar("Acertijo abierto.");
     }
 
     // Esta función la llamaremos desde un botón en la pantalla para salir
@@ -55,7 +55,7 @@ public class EcoInteractuable : MonoBehaviour
             panelRompecabezas.SetActive(false); 
         }
         
-        Debug.Log("Rompecabezas cerrado. El reloj vuelve a correr.");
+        MensajeriaJugador.Mostrar("Volviste al juego principal.");
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -64,7 +64,7 @@ public class EcoInteractuable : MonoBehaviour
         {
             enRango = true;
             milo = collision.GetComponent<MiloController>();
-            Debug.Log("Presiona 'E' y usa tu linterna.");
+            MostrarMensajeInteraccion();
         }
     }
 
@@ -74,6 +74,18 @@ public class EcoInteractuable : MonoBehaviour
         {
             enRango = false;
             milo = null;
+        }
+    }
+
+    void MostrarMensajeInteraccion()
+    {
+        if (milo != null && milo.linternaEncendida)
+        {
+            MensajeriaJugador.Mostrar("Presiona E para interactuar con este eco.");
+        }
+        else
+        {
+            MensajeriaJugador.Mostrar("Enciende la linterna y presiona E para interactuar con este eco.");
         }
     }
 }

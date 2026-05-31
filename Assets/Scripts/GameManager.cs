@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     private static Sprite spriteLineaCompartido;
     private bool ecoRecolectado = false;
     private int bloqueosHudMinijuego = 0;
+    private EstaticaController estaticaController;
 
     [Header("Compatibilidad (Legacy)")]
     public bool tieneMochila = false;
@@ -58,6 +59,13 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (ManagerRuido.instancia != null)
+        {
+            // Con ManagerRuido activo, el ruido se gestiona en un solo lugar.
+            temporizador = 0f;
+            return;
+        }
+
         // Si Milo está escondido y el ruido es mayor a 0, empezamos a contar el tiempo
         if (miloOculto && nivelDeRuido > 0)
         {
@@ -79,14 +87,20 @@ public class GameManager : MonoBehaviour
 
     public void AgregarRuido(int cantidad)
     {
-        if (miloOculto) return; 
+        if (miloOculto) return;
+
+        if (ManagerRuido.instancia != null)
+        {
+            ManagerRuido.instancia.AgregarRuido(cantidad);
+            return;
+        }
 
         nivelDeRuido += cantidad;
-        Debug.Log("¡Hiciste ruido! Nivel actual: " + nivelDeRuido);
+        MensajeriaJugador.Mostrar("Hiciste ruido. Nivel actual: " + nivelDeRuido + "/" + ruidoMaximo + ".");
 
         if (nivelDeRuido >= ruidoMaximo)
         {
-            Debug.Log("¡Alcanzaste el ruido máximo! La Estática te ha encontrado.");
+            MensajeriaJugador.Mostrar("¡Cuidado! El ruido llegó al máximo.");
         }
     }
 
@@ -116,14 +130,13 @@ public class GameManager : MonoBehaviour
         if (nombreNormalizado == "Mochila")
         {
             tieneMochila = true;
-            Debug.Log("¡Recogiste un objeto!");
         }
         else if (nombreNormalizado == "Llave")
         {
             tieneLlave = true;
         }
 
-        Debug.Log("¡Recogiste " + nombreNormalizado + "!");
+        MensajeriaJugador.Mostrar("Recogiste: " + nombreNormalizado + ".");
         ActualizarEstadoUI();
     }
 
@@ -135,7 +148,7 @@ public class GameManager : MonoBehaviour
         }
 
         ecoRecolectado = true;
-        Debug.Log("Eco registrado en GameManager.");
+        MensajeriaJugador.Mostrar("Eco recolectado.");
         ActualizarEstadoUI();
     }
 
@@ -610,6 +623,12 @@ public class GameManager : MonoBehaviour
     public void OcultarHudProgresoEnMinijuego()
     {
         ResolverReferenciasUI();
+
+        if (bloqueosHudMinijuego == 0)
+        {
+            AplicarPausaEstaticaEnMinijuego(true);
+        }
+
         bloqueosHudMinijuego++;
         AplicarVisibilidadHudProgreso(false);
     }
@@ -625,7 +644,30 @@ public class GameManager : MonoBehaviour
 
         if (bloqueosHudMinijuego == 0)
         {
+            AplicarPausaEstaticaEnMinijuego(false);
             AplicarVisibilidadHudProgreso(true);
+        }
+    }
+
+    private void AplicarPausaEstaticaEnMinijuego(bool pausar)
+    {
+        if (estaticaController == null)
+        {
+            estaticaController = FindObjectOfType<EstaticaController>();
+        }
+
+        if (estaticaController == null)
+        {
+            return;
+        }
+
+        if (pausar)
+        {
+            estaticaController.PausarPorMinijuego();
+        }
+        else
+        {
+            estaticaController.ReanudarTrasMinijuego();
         }
     }
 

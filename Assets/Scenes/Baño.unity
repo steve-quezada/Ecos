@@ -392,6 +392,7 @@ GameObject:
   - component: {fileID: 90104667}
   - component: {fileID: 90104671}
   - component: {fileID: 90104672}
+  - component: {fileID: 90104673}
   m_Layer: 0
   m_Name: Cortinas_Seguras
   m_TagString: Untagged
@@ -413,6 +414,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offsetSalida: {x: 1.5, y: 0}
   indicadorTeclaE: {fileID: 334866957}
+  usarIndicadorTecla: 0
+  mostrarIndicadorSoloEnRango: 0
+  offsetIndicadorAutomatico: {x: 0, y: 1.2, z: 0}
+  colorIndicadorSeguro: {r: 0.25, g: 0.95, b: 0.35, a: 1}
+  colorIndicadorTrampa: {r: 1, g: 0.55, b: 0.1, a: 1}
+  amplitudPulsoIndicador: 0.08
+  velocidadPulsoIndicador: 4
+  mostrarContorno: 1
+  mostrarContornoSoloEnRango: 0
+  colorContornoSeguro: {r: 0.46, g: 0.72, b: 0.6, a: 0.52}
+  colorContornoTrampa: {r: 0.78, g: 0.57, b: 0.42, a: 0.52}
+  grosorContorno: 0.06
+  amplitudPulsoContorno: 0.012
+  velocidadPulsoContorno: 1.8
+  segmentosCirculoContorno: 28
+  ordenRenderContorno: 20
   esTrampaMortal: 0
   ocultarSpriteAlMorir: 1
   fuenteAudioMuerte: {fileID: 0}
@@ -521,7 +538,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 90104666}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -559,6 +576,127 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 4.67, y: 4.48}
   m_EdgeRadius: 0
+--- !u!60 &90104673
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90104666}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 4.67, y: 4.48}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.745, y: -2.2}
+      - {x: 1.235, y: -2.21}
+      - {x: 1.405, y: -2.24}
+      - {x: 1.885, y: -2.24}
+      - {x: 2.0249999, y: -2.1699998}
+      - {x: 2.145, y: -2.03}
+      - {x: 2.145, y: -1.8399999}
+      - {x: 2.135, y: -1.5999999}
+      - {x: 2.105, y: -1.4399999}
+      - {x: 2.095, y: -1.09}
+      - {x: 2.0449998, y: -0.98999995}
+      - {x: 2.0449998, y: -0.62}
+      - {x: 2.095, y: -0.58}
+      - {x: 2.085, y: -0.38}
+      - {x: 2.055, y: -0.17}
+      - {x: 2.095, y: -0.099999994}
+      - {x: 2.105, y: 0.17}
+      - {x: 2.105, y: 1.24}
+      - {x: 2.115, y: 1.62}
+      - {x: 2.185, y: 1.68}
+      - {x: 2.335, y: 1.8299999}
+      - {x: 2.335, y: 2.04}
+      - {x: 2.2849998, y: 2.1399999}
+      - {x: 2.215, y: 2.22}
+      - {x: 2.0349998, y: 2.23}
+      - {x: 1.055, y: 2.23}
+      - {x: 1.005, y: 2.18}
+      - {x: 0.865, y: 2.23}
+      - {x: 0.60499996, y: 2.23}
+      - {x: 0.515, y: 2.22}
+      - {x: 0.465, y: 2.23}
+      - {x: 0.305, y: 2.23}
+      - {x: 0.235, y: 2.22}
+      - {x: -0.005, y: 2.19}
+      - {x: -0.205, y: 2.21}
+      - {x: -0.355, y: 2.21}
+      - {x: -0.555, y: 2.22}
+      - {x: -0.905, y: 2.18}
+      - {x: -1.0849999, y: 2.23}
+      - {x: -1.235, y: 2.23}
+      - {x: -1.285, y: 2.21}
+      - {x: -1.355, y: 2.23}
+      - {x: -1.4549999, y: 2.23}
+      - {x: -1.605, y: 2.22}
+      - {x: -1.7149999, y: 2.23}
+      - {x: -1.8449999, y: 2.22}
+      - {x: -1.875, y: 2.18}
+      - {x: -2.165, y: 2.2}
+      - {x: -2.305, y: 2.08}
+      - {x: -2.325, y: 2.04}
+      - {x: -2.325, y: 1.92}
+      - {x: -2.315, y: 1.8399999}
+      - {x: -2.205, y: 1.7199999}
+      - {x: -2.115, y: 1.61}
+      - {x: -2.115, y: 1.43}
+      - {x: -2.085, y: 1.4}
+      - {x: -2.095, y: 1.06}
+      - {x: -2.095, y: 0.47}
+      - {x: -2.075, y: 0.45999998}
+      - {x: -2.085, y: 0.07}
+      - {x: -2.065, y: -0.14}
+      - {x: -2.0249999, y: -0.32999998}
+      - {x: -2.065, y: -0.42}
+      - {x: -2.075, y: -0.57}
+      - {x: -2.0449998, y: -0.71999997}
+      - {x: -2.0249999, y: -1.01}
+      - {x: -2.075, y: -1.03}
+      - {x: -2.145, y: -1.76}
+      - {x: -2.125, y: -2.07}
+      - {x: -2.0449998, y: -2.18}
+      - {x: -1.9449999, y: -2.22}
+      - {x: -1.675, y: -2.24}
+      - {x: -1.505, y: -2.24}
+      - {x: -1.3149999, y: -2.21}
+      - {x: 0.015, y: -2.2}
+      - {x: 0.635, y: -2.19}
+  m_UseDelaunayMesh: 0
 --- !u!1 &108031389
 GameObject:
   m_ObjectHideFlags: 3
@@ -2735,6 +2873,7 @@ GameObject:
   - component: {fileID: 476530396}
   - component: {fileID: 476530395}
   - component: {fileID: 476530394}
+  - component: {fileID: 476530399}
   m_Layer: 0
   m_Name: Tina_Escondite
   m_TagString: Untagged
@@ -2818,6 +2957,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offsetSalida: {x: 1.5, y: 0}
   indicadorTeclaE: {fileID: 2106793471}
+  usarIndicadorTecla: 0
+  mostrarIndicadorSoloEnRango: 0
+  offsetIndicadorAutomatico: {x: 0, y: 1.2, z: 0}
+  colorIndicadorSeguro: {r: 0.25, g: 0.95, b: 0.35, a: 1}
+  colorIndicadorTrampa: {r: 1, g: 0.55, b: 0.1, a: 1}
+  amplitudPulsoIndicador: 0.08
+  velocidadPulsoIndicador: 4
+  mostrarContorno: 1
+  mostrarContornoSoloEnRango: 0
+  colorContornoSeguro: {r: 0.46, g: 0.72, b: 0.6, a: 0.52}
+  colorContornoTrampa: {r: 0.78, g: 0.57, b: 0.42, a: 0.52}
+  grosorContorno: 0.06
+  amplitudPulsoContorno: 0.012
+  velocidadPulsoContorno: 1.8
+  segmentosCirculoContorno: 28
+  ordenRenderContorno: 20
   esTrampaMortal: 0
   ocultarSpriteAlMorir: 1
   fuenteAudioMuerte: {fileID: 0}
@@ -2892,6 +3047,107 @@ Transform:
   - {fileID: 2106793474}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 21.533}
+--- !u!60 &476530399
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 476530393}
+  m_Enabled: 0
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 14.375, y: 8.21875}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 4.9375, y: -2.421875}
+      - {x: 5.5625, y: -1.953125}
+      - {x: 6.1875, y: -0.890625}
+      - {x: 6.4375, y: -0.171875}
+      - {x: 6.96875, y: 0.328125}
+      - {x: 7.1875, y: 0.640625}
+      - {x: 7.1875, y: 1.609375}
+      - {x: 7.09375, y: 1.890625}
+      - {x: 7, y: 2.296875}
+      - {x: 6.71875, y: 2.484375}
+      - {x: 6.6875, y: 3.140625}
+      - {x: 6.46875, y: 3.328125}
+      - {x: 6.15625, y: 3.984375}
+      - {x: 6.03125, y: 4.109375}
+      - {x: 5.09375, y: 4.109375}
+      - {x: 4.9375, y: 3.640625}
+      - {x: 5.0625, y: 3.421875}
+      - {x: 5.1875, y: 3.328125}
+      - {x: 5.34375, y: 3.296875}
+      - {x: 5.3125, y: 3.296875}
+      - {x: 5.0625, y: 3.359375}
+      - {x: 4.90625, y: 3.546875}
+      - {x: 4.75, y: 3.640625}
+      - {x: 3.625, y: 3.671875}
+      - {x: 2.09375, y: 3.671875}
+      - {x: 0.9375, y: 3.703125}
+      - {x: -2.6875, y: 3.703125}
+      - {x: -4.65625, y: 3.640625}
+      - {x: -5.4375, y: 3.484375}
+      - {x: -6.65625, y: 2.921875}
+      - {x: -6.9375, y: 2.578125}
+      - {x: -7.1875, y: 1.828125}
+      - {x: -7.1875, y: 1.015625}
+      - {x: -7, y: 0.578125}
+      - {x: -5.6875, y: -1.296875}
+      - {x: -5.25, y: -2.015625}
+      - {x: -5.03125, y: -2.265625}
+      - {x: -4.5, y: -2.921875}
+      - {x: -4.6875, y: -3.140625}
+      - {x: -4.75, y: -3.609375}
+      - {x: -4.25, y: -3.984375}
+      - {x: -3.8125, y: -3.953125}
+      - {x: -3.40625, y: -3.609375}
+      - {x: -3.4375, y: -3.140625}
+      - {x: -3.03125, y: -2.859375}
+      - {x: -1.28125, y: -2.921875}
+      - {x: -0.03125, y: -2.859375}
+      - {x: 1.5625, y: -2.890625}
+      - {x: 3.21875, y: -2.859375}
+      - {x: 3.375, y: -3.640625}
+      - {x: 3.59375, y: -4.015625}
+      - {x: 3.8125, y: -4.109375}
+      - {x: 4.65625, y: -4.109375}
+      - {x: 5.03125, y: -3.734375}
+      - {x: 5.03125, y: -3.109375}
+      - {x: 4.875, y: -2.671875}
+  m_UseDelaunayMesh: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -3077,7 +3333,7 @@ GameObject:
   - component: {fileID: 559196508}
   - component: {fileID: 559196507}
   m_Layer: 0
-  m_Name: Agua
+  m_Name: Bateria
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3095,7 +3351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5dd7b684542447a99da4889087c767, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nombreDelObjeto: Agua
+  nombreDelObjeto: Bateria
 --- !u!58 &559196508
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -4180,16 +4436,23 @@ MonoBehaviour:
   imagenReceta: {fileID: 21300000, guid: a5d39e8533e664273a7477642ecff2a6, type: 3}
   posicionReceta: {x: 0, y: 500}
   tamanoReceta: {x: 1200, y: 900}
+  mensajeFinal: 'TU LO VISTE
+
+    TU LO DEJASTE PASAR'
+  posicionInstruccion: {x: 0, y: -170}
+  posicionMensaje: {x: 0, y: -240}
+  tamanoMensaje: {x: 1100, y: 220}
+  posicionContinuar: {x: 160, y: -340}
   colorFondo: {r: 0.92, g: 0.89, b: 0.84, a: 0.98}
   colorBoton: {r: 0.22, g: 0.2, b: 0.18, a: 1}
   colorTexto: {r: 0.12, g: 0.1, b: 0.08, a: 1}
-  colorInput: {r: 1, g: 1, b: 1, a: 0.95}
+  colorMensaje: {r: 0.22, g: 0.12, b: 0.08, a: 1}
   tamanoPociones: {x: 260, y: 400}
-  separacionX: 280
   posicionFila: {x: 0, y: -200}
-  posicionInput: {x: 0, y: -580}
-  posicionVerificar: {x: -400, y: -850}
   posicionCerrar: {x: 400, y: -850}
+  usarAnclajeBotonesHabitacion: 1
+  margenLateralBotones: 190
+  margenInferiorBotones: 52
   ajustarLayoutSegunPantalla: 1
 --- !u!1 &989028238
 GameObject:
@@ -6447,11 +6710,29 @@ MonoBehaviour:
   incrementoVelocidadPorRuido: 0.18
   tiempoAparicion: 15
   duracionPatrullaje: 10
+  distanciaMinimaAparicionJugador: 4.5
+  enfriamientoTrasMinijuego: 4
   rangoMovimientoAleatorio: 8
   radioCurva: 1.2
   intervaloCambioCurva: 0.35
   suavizadoCurva: 0.14
   probabilidadCambioLado: 0.3
+  mostrarSenalAparicion: 0
+  duracionSenalAparicion: 1
+  escalaInicialSenal: 0.35
+  escalaFinalSenal: 2.25
+  grosorCruzSenal: 0.16
+  colorSenalAparicion: {r: 1, g: 0.36, b: 0.12, a: 0.95}
+  mostrarSenalDireccionEnMilo: 1
+  duracionSenalDireccion: 1.2
+  cantidadLineasDireccion: 3
+  distanciaBaseSenalDireccion: 0.5
+  separacionSenalDireccion: 0.18
+  largoLineaSenalDireccion: 0.44
+  grosorLineaSenalDireccion: 0.06
+  amplitudRespiracionSenal: 0.06
+  velocidadRespiracionSenal: 6.2
+  colorSenalDireccion: {r: 1, g: 0.84, b: 0.68, a: 0.9}
   fuenteAudio: {fileID: 1854654475}
   sonidoAparicion: {fileID: 8300000, guid: 39ac928c262d3a4479fc89b4c80499a7, type: 3}
   volumenAparicion: 1

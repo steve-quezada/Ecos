@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class Escondite : MonoBehaviour
 {
@@ -13,6 +15,26 @@ public class Escondite : MonoBehaviour
     [Header("UI Flotante")]
     [Tooltip("Arrastra aquí el objeto 3D de la [E]. Se quedará siempre visible.")]
     public GameObject indicadorTeclaE; 
+
+    [Header("Identificación Visual")]
+    public bool usarIndicadorTecla = false;
+    public bool mostrarIndicadorSoloEnRango = false;
+    public Vector3 offsetIndicadorAutomatico = new Vector3(0f, 1.2f, 0f);
+    public Color colorIndicadorSeguro = new Color(0.25f, 0.95f, 0.35f, 1f);
+    public Color colorIndicadorTrampa = new Color(1f, 0.55f, 0.1f, 1f);
+    [Range(0f, 0.3f)] public float amplitudPulsoIndicador = 0.08f;
+    public float velocidadPulsoIndicador = 4f;
+
+    [Header("Contorno del Escondite")]
+    public bool mostrarContorno = true;
+    public bool mostrarContornoSoloEnRango = false;
+    public Color colorContornoSeguro = new Color(0.46f, 0.72f, 0.6f, 0.52f);
+    public Color colorContornoTrampa = new Color(0.78f, 0.57f, 0.42f, 0.52f);
+    [Range(0.01f, 0.25f)] public float grosorContorno = 0.06f;
+    [Range(0f, 0.2f)] public float amplitudPulsoContorno = 0.012f;
+    public float velocidadPulsoContorno = 1.8f;
+    [Range(12, 72)] public int segmentosCirculoContorno = 28;
+    public int ordenRenderContorno = 20;
 
     [Header("Modo Trampa")]
     public bool esTrampaMortal = false;
@@ -33,10 +55,15 @@ public class Escondite : MonoBehaviour
 
     private Coroutine rutinaReduccionRuido;
     private bool muerteTrampaEnCurso = false;
+    private Vector3 escalaBaseIndicador = Vector3.one;
+    private LineRenderer contornoRenderer;
+    private float grosorBaseContorno = 0f;
 
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
+        InicializarIndicadorVisual();
+        InicializarContornoVisual();
 
         if (gameManager == null)
         {
@@ -47,6 +74,9 @@ public class Escondite : MonoBehaviour
     void Update()
     {
         if (gameManager == null) return;
+
+        ActualizarPulsoIndicador();
+        ActualizarPulsoContorno();
 
         if (enZonaDeEscondite && Input.GetKeyDown(KeyCode.E))
         {
@@ -75,7 +105,9 @@ public class Escondite : MonoBehaviour
         miloSprite.enabled = false;
 
         // Apagamos la [E] mientras Milo está escondido
-        if (indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
+        if (usarIndicadorTecla && indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
+
+        ActualizarVisibilidadContorno();
 
         if (rutinaReduccionRuido != null) 
         {
@@ -83,7 +115,7 @@ public class Escondite : MonoBehaviour
         }
         rutinaReduccionRuido = StartCoroutine(ReducirRuidoPorSegundo());
 
-        Debug.Log("Milo se escondió. Iniciando reducción de ruido...");
+        MensajeriaJugador.Mostrar("Te escondiste. El ruido comenzará a bajar.");
     }
 
     void SalirDelEscondite()
@@ -94,7 +126,12 @@ public class Escondite : MonoBehaviour
         miloSprite.enabled = true;
 
         // Prendemos la [E] de nuevo porque Milo ya salió
-        if (indicadorTeclaE != null) indicadorTeclaE.SetActive(true);
+        if (usarIndicadorTecla && indicadorTeclaE != null)
+        {
+            indicadorTeclaE.SetActive(!mostrarIndicadorSoloEnRango || enZonaDeEscondite);
+        }
+
+        ActualizarVisibilidadContorno();
 
         if (rutinaReduccionRuido != null)
         {
@@ -102,7 +139,7 @@ public class Escondite : MonoBehaviour
             rutinaReduccionRuido = null;
         }
 
-        Debug.Log("Milo salió del escondite. El ruido dejó de bajar.");
+        MensajeriaJugador.Mostrar("Saliste del escondite.");
     }
 
     void ActivarTrampaMortal()
@@ -112,7 +149,7 @@ public class Escondite : MonoBehaviour
         muerteTrampaEnCurso = true;
         
         // Apagamos la [E] porque el escondite resultó ser falso
-        if (indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
+        if (usarIndicadorTecla && indicadorTeclaE != null) indicadorTeclaE.SetActive(false);
 
         if (rutinaReduccionRuido != null)
         {
@@ -126,7 +163,8 @@ public class Escondite : MonoBehaviour
         if (ocultarSpriteAlMorir && miloSprite != null) miloSprite.enabled = false;
 
         enZonaDeEscondite = false;
-        Debug.Log("\u00a1TRAMPA! Ese escondite era falso. Milo murió al instante.");
+        ActualizarVisibilidadContorno();
+        MensajeriaJugador.Mostrar("¡Era una trampa!");
 
         ReproducirGritoMuerte();
         StartCoroutine(SecuenciaMuerteTrampa());
@@ -185,11 +223,503 @@ public class Escondite : MonoBehaviour
                 miloController = collision.GetComponent<MiloController>();
                 miloSprite = collision.GetComponent<SpriteRenderer>();
             }
+
+            ActualizarVisibilidadIndicador();
+            ActualizarVisibilidadContorno();
         }
     }
 
     void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player")) enZonaDeEscondite = false;
+        if (collision.CompareTag("Player"))
+        {
+            enZonaDeEscondite = false;
+            ActualizarVisibilidadIndicador();
+            ActualizarVisibilidadContorno();
+        }
+    }
+
+    void InicializarIndicadorVisual()
+    {
+        ValidarReferenciaIndicador();
+
+        if (!usarIndicadorTecla)
+        {
+            OcultarIndicadoresEExistentes();
+            return;
+        }
+
+        if (indicadorTeclaE == null)
+        {
+            TMP_Text textoTmp = GetComponentInChildren<TMP_Text>(true);
+            if (textoTmp != null && textoTmp.text.Contains("E"))
+            {
+                indicadorTeclaE = textoTmp.gameObject;
+            }
+        }
+
+        if (indicadorTeclaE == null)
+        {
+            indicadorTeclaE = CrearIndicadorAutomatico();
+        }
+
+        if (indicadorTeclaE == null)
+        {
+            return;
+        }
+
+        escalaBaseIndicador = indicadorTeclaE.transform.localScale;
+        AplicarColorIndicador();
+        ActualizarVisibilidadIndicador();
+    }
+
+    void OcultarIndicadoresEExistentes()
+    {
+        ValidarReferenciaIndicador();
+
+        if (indicadorTeclaE != null)
+        {
+            indicadorTeclaE.SetActive(false);
+        }
+
+        TMP_Text[] textosTmp = GetComponentsInChildren<TMP_Text>(true);
+        for (int i = 0; i < textosTmp.Length; i++)
+        {
+            if (textosTmp[i] == null)
+            {
+                continue;
+            }
+
+            string contenido = textosTmp[i].text.Trim();
+            if (contenido == "E" || contenido == "[E]" || contenido == "(E)")
+            {
+                textosTmp[i].gameObject.SetActive(false);
+            }
+        }
+
+        TextMesh[] textos3D = GetComponentsInChildren<TextMesh>(true);
+        for (int i = 0; i < textos3D.Length; i++)
+        {
+            if (textos3D[i] == null)
+            {
+                continue;
+            }
+
+            string contenido = textos3D[i].text.Trim();
+            if (contenido == "E" || contenido == "[E]" || contenido == "(E)")
+            {
+                textos3D[i].gameObject.SetActive(false);
+            }
+        }
+    }
+
+    GameObject CrearIndicadorAutomatico()
+    {
+        GameObject indicador = new GameObject("IndicadorE_Auto");
+        indicador.transform.SetParent(transform, false);
+        indicador.transform.localPosition = offsetIndicadorAutomatico;
+
+        TextMesh texto = indicador.AddComponent<TextMesh>();
+        texto.text = "[E]";
+        texto.fontSize = 72;
+        texto.characterSize = 0.06f;
+        texto.anchor = TextAnchor.MiddleCenter;
+        texto.alignment = TextAlignment.Center;
+
+        MeshRenderer render = indicador.GetComponent<MeshRenderer>();
+        if (render != null)
+        {
+            render.sortingOrder = 150;
+        }
+
+        return indicador;
+    }
+
+    void AplicarColorIndicador()
+    {
+        if (indicadorTeclaE == null)
+        {
+            return;
+        }
+
+        Color colorObjetivo = esTrampaMortal ? colorIndicadorTrampa : colorIndicadorSeguro;
+
+        TMP_Text[] textosTmp = indicadorTeclaE.GetComponentsInChildren<TMP_Text>(true);
+        for (int i = 0; i < textosTmp.Length; i++)
+        {
+            textosTmp[i].color = colorObjetivo;
+        }
+
+        TextMesh[] textos3D = indicadorTeclaE.GetComponentsInChildren<TextMesh>(true);
+        for (int i = 0; i < textos3D.Length; i++)
+        {
+            textos3D[i].color = colorObjetivo;
+        }
+
+        SpriteRenderer[] sprites = indicadorTeclaE.GetComponentsInChildren<SpriteRenderer>(true);
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            sprites[i].color = colorObjetivo;
+        }
+    }
+
+    void ActualizarVisibilidadIndicador()
+    {
+        ValidarReferenciaIndicador();
+
+        if (!usarIndicadorTecla || indicadorTeclaE == null)
+        {
+            return;
+        }
+
+        bool visible = !mostrarIndicadorSoloEnRango || enZonaDeEscondite;
+        bool miloOcultoActual = gameManager != null && gameManager.miloOculto;
+        indicadorTeclaE.SetActive(visible && !miloOcultoActual);
+    }
+
+    void ActualizarPulsoIndicador()
+    {
+        ValidarReferenciaIndicador();
+
+        if (!usarIndicadorTecla || indicadorTeclaE == null || !indicadorTeclaE.activeSelf)
+        {
+            return;
+        }
+
+        float pulso = 1f + Mathf.Sin(Time.time * velocidadPulsoIndicador) * amplitudPulsoIndicador;
+        indicadorTeclaE.transform.localScale = escalaBaseIndicador * pulso;
+    }
+
+    void ValidarReferenciaIndicador()
+    {
+        if (indicadorTeclaE == gameObject)
+        {
+            Debug.LogWarning("El indicadorTeclaE apunta al mismo objeto del escondite en: " + gameObject.name + ". Se ignorará para evitar ocultarlo al iniciar.");
+            indicadorTeclaE = null;
+        }
+    }
+
+    void InicializarContornoVisual()
+    {
+        if (!mostrarContorno)
+        {
+            return;
+        }
+
+        SpriteRenderer spriteBase = GetComponent<SpriteRenderer>();
+        Collider2D col = GetComponent<Collider2D>();
+        if (spriteBase == null && col == null)
+        {
+            Debug.LogWarning("Escondite sin sprite/collider para contorno en: " + gameObject.name);
+            return;
+        }
+
+        GameObject nodoContorno = new GameObject("ContornoEscondite");
+        nodoContorno.transform.SetParent(transform, false);
+        nodoContorno.transform.localPosition = Vector3.zero;
+        nodoContorno.transform.localRotation = Quaternion.identity;
+        nodoContorno.transform.localScale = Vector3.one;
+
+        contornoRenderer = nodoContorno.AddComponent<LineRenderer>();
+        contornoRenderer.useWorldSpace = false;
+        contornoRenderer.loop = true;
+        contornoRenderer.textureMode = LineTextureMode.Stretch;
+        contornoRenderer.alignment = LineAlignment.View;
+        contornoRenderer.numCornerVertices = 4;
+        contornoRenderer.numCapVertices = 2;
+        contornoRenderer.receiveShadows = false;
+        contornoRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        Material mat = new Material(Shader.Find("Sprites/Default"));
+        mat.hideFlags = HideFlags.HideAndDontSave;
+        contornoRenderer.material = mat;
+
+        if (spriteBase != null)
+        {
+            contornoRenderer.sortingLayerID = spriteBase.sortingLayerID;
+            contornoRenderer.sortingOrder = spriteBase.sortingOrder + 1;
+        }
+        else
+        {
+            contornoRenderer.sortingOrder = ordenRenderContorno;
+        }
+
+        grosorBaseContorno = Mathf.Max(0.01f, grosorContorno);
+        contornoRenderer.startWidth = grosorBaseContorno;
+        contornoRenderer.endWidth = grosorBaseContorno;
+
+        bool contornoConstruido = ConstruirContornoDesdeSprite(spriteBase);
+        if (!contornoConstruido)
+        {
+            contornoConstruido = ConstruirContornoDesdeCollider(col);
+        }
+        if (!contornoConstruido && spriteBase != null)
+        {
+            contornoConstruido = ConstruirContornoDesdeBoundsSprite(spriteBase);
+        }
+        if (!contornoConstruido && col != null)
+        {
+            contornoConstruido = ConstruirContornoDesdeBoundsCollider(col);
+        }
+
+        if (!contornoConstruido)
+        {
+            Debug.LogWarning("No se pudo construir contorno para escondite en: " + gameObject.name);
+            contornoRenderer.enabled = false;
+            return;
+        }
+
+        AplicarColorContorno();
+        ActualizarVisibilidadContorno();
+    }
+
+    bool ConstruirContornoDesdeSprite(SpriteRenderer spriteBase)
+    {
+        if (contornoRenderer == null || spriteBase == null || spriteBase.sprite == null)
+        {
+            return false;
+        }
+
+        Sprite sprite = spriteBase.sprite;
+        int cantidadFormas = sprite.GetPhysicsShapeCount();
+        if (cantidadFormas <= 0)
+        {
+            return false;
+        }
+
+        List<Vector2> mejorForma = null;
+        float mejorArea = 0f;
+        List<Vector2> formaActual = new List<Vector2>(64);
+
+        for (int i = 0; i < cantidadFormas; i++)
+        {
+            formaActual.Clear();
+            sprite.GetPhysicsShape(i, formaActual);
+            if (formaActual.Count < 3)
+            {
+                continue;
+            }
+
+            float area = Mathf.Abs(CalcularAreaPoligono(formaActual));
+            if (area > mejorArea)
+            {
+                mejorArea = area;
+                if (mejorForma == null)
+                {
+                    mejorForma = new List<Vector2>(formaActual.Count);
+                }
+                else
+                {
+                    mejorForma.Clear();
+                }
+
+                for (int p = 0; p < formaActual.Count; p++)
+                {
+                    mejorForma.Add(formaActual[p]);
+                }
+            }
+        }
+
+        if (mejorForma == null || mejorForma.Count < 3)
+        {
+            return false;
+        }
+
+        float flipX = spriteBase.flipX ? -1f : 1f;
+        float flipY = spriteBase.flipY ? -1f : 1f;
+
+        contornoRenderer.positionCount = mejorForma.Count;
+        for (int i = 0; i < mejorForma.Count; i++)
+        {
+            Vector2 p = mejorForma[i];
+            contornoRenderer.SetPosition(i, new Vector3(p.x * flipX, p.y * flipY, 0f));
+        }
+
+        return true;
+    }
+
+    bool ConstruirContornoDesdeCollider(Collider2D col)
+    {
+        if (contornoRenderer == null || col == null)
+        {
+            return false;
+        }
+
+        if (col is PolygonCollider2D poly && poly.pathCount > 0)
+        {
+            int mejorIndice = -1;
+            float mejorArea = 0f;
+
+            for (int i = 0; i < poly.pathCount; i++)
+            {
+                Vector2[] path = poly.GetPath(i);
+                if (path == null || path.Length < 3)
+                {
+                    continue;
+                }
+
+                float area = Mathf.Abs(CalcularAreaPoligono(path));
+                if (area > mejorArea)
+                {
+                    mejorArea = area;
+                    mejorIndice = i;
+                }
+            }
+
+            if (mejorIndice >= 0)
+            {
+                Vector2[] mejorPath = poly.GetPath(mejorIndice);
+                contornoRenderer.positionCount = mejorPath.Length;
+                for (int i = 0; i < mejorPath.Length; i++)
+                {
+                    contornoRenderer.SetPosition(i, new Vector3(mejorPath[i].x, mejorPath[i].y, 0f));
+                }
+
+                return true;
+            }
+        }
+
+        if (col is CircleCollider2D circle)
+        {
+            int segs = Mathf.Max(12, segmentosCirculoContorno);
+            contornoRenderer.positionCount = segs;
+            float paso = Mathf.PI * 2f / segs;
+            for (int i = 0; i < segs; i++)
+            {
+                float ang = i * paso;
+                Vector2 p = circle.offset + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * circle.radius;
+                contornoRenderer.SetPosition(i, new Vector3(p.x, p.y, 0f));
+            }
+
+            return true;
+        }
+
+        if (col is CapsuleCollider2D capsule)
+        {
+            int segs = Mathf.Max(18, segmentosCirculoContorno);
+            Vector2 semiejes = capsule.size * 0.5f;
+            contornoRenderer.positionCount = segs;
+            float paso = Mathf.PI * 2f / segs;
+            for (int i = 0; i < segs; i++)
+            {
+                float ang = i * paso;
+                Vector2 p = capsule.offset + new Vector2(Mathf.Cos(ang) * semiejes.x, Mathf.Sin(ang) * semiejes.y);
+                contornoRenderer.SetPosition(i, new Vector3(p.x, p.y, 0f));
+            }
+
+            return true;
+        }
+
+        if (col is BoxCollider2D box)
+        {
+            Vector2 half = box.size * 0.5f;
+            Vector2 o = box.offset;
+            Vector3[] puntos = new Vector3[4]
+            {
+                new Vector3(o.x - half.x, o.y - half.y, 0f),
+                new Vector3(o.x - half.x, o.y + half.y, 0f),
+                new Vector3(o.x + half.x, o.y + half.y, 0f),
+                new Vector3(o.x + half.x, o.y - half.y, 0f)
+            };
+            contornoRenderer.positionCount = puntos.Length;
+            contornoRenderer.SetPositions(puntos);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool ConstruirContornoDesdeBoundsSprite(SpriteRenderer spriteBase)
+    {
+        if (contornoRenderer == null || spriteBase == null)
+        {
+            return false;
+        }
+
+        return ConstruirRectanguloDesdeBoundsMundo(spriteBase.bounds);
+    }
+
+    bool ConstruirContornoDesdeBoundsCollider(Collider2D col)
+    {
+        if (contornoRenderer == null || col == null)
+        {
+            return false;
+        }
+
+        return ConstruirRectanguloDesdeBoundsMundo(col.bounds);
+    }
+
+    bool ConstruirRectanguloDesdeBoundsMundo(Bounds bounds)
+    {
+        if (bounds.size.sqrMagnitude <= 0.0001f)
+        {
+            return false;
+        }
+
+        Vector3 min = transform.InverseTransformPoint(new Vector3(bounds.min.x, bounds.min.y, 0f));
+        Vector3 max = transform.InverseTransformPoint(new Vector3(bounds.max.x, bounds.max.y, 0f));
+        Vector3[] rect = new Vector3[4]
+        {
+            new Vector3(min.x, min.y, 0f),
+            new Vector3(min.x, max.y, 0f),
+            new Vector3(max.x, max.y, 0f),
+            new Vector3(max.x, min.y, 0f)
+        };
+        contornoRenderer.positionCount = rect.Length;
+        contornoRenderer.SetPositions(rect);
+        return true;
+    }
+
+    float CalcularAreaPoligono(IList<Vector2> puntos)
+    {
+        if (puntos == null || puntos.Count < 3)
+        {
+            return 0f;
+        }
+
+        float area = 0f;
+        for (int i = 0; i < puntos.Count; i++)
+        {
+            int j = (i + 1) % puntos.Count;
+            area += (puntos[i].x * puntos[j].y) - (puntos[j].x * puntos[i].y);
+        }
+
+        return area * 0.5f;
+    }
+
+    void AplicarColorContorno()
+    {
+        if (contornoRenderer == null)
+        {
+            return;
+        }
+
+        Color color = esTrampaMortal ? colorContornoTrampa : colorContornoSeguro;
+        contornoRenderer.startColor = color;
+        contornoRenderer.endColor = color;
+    }
+
+    void ActualizarVisibilidadContorno()
+    {
+        if (contornoRenderer == null)
+        {
+            return;
+        }
+
+        bool visible = mostrarContorno && (!mostrarContornoSoloEnRango || enZonaDeEscondite) && !muerteTrampaEnCurso;
+        contornoRenderer.enabled = visible;
+    }
+
+    void ActualizarPulsoContorno()
+    {
+        if (contornoRenderer == null || !contornoRenderer.enabled)
+        {
+            return;
+        }
+
+        float pulso = 1f + Mathf.Sin(Time.time * velocidadPulsoContorno) * amplitudPulsoContorno;
+        float ancho = Mathf.Max(0.01f, grosorBaseContorno * pulso);
+        contornoRenderer.startWidth = ancho;
+        contornoRenderer.endWidth = ancho;
     }
 }

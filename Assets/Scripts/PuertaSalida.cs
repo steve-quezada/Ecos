@@ -33,7 +33,7 @@ public class PuertaSalida : MonoBehaviour
                     return;
                 }
 
-                Debug.Log("¡NIVEL COMPLETADO! Cruzaste la puerta. Viajando a: " + nombreSiguienteEscena);
+                MensajeriaJugador.Mostrar("¡Excelente! Pasaste a la siguiente habitación.");
                 
                 // Esta es la línea mágica que carga el nuevo nivel
                 SceneManager.LoadScene(nombreSiguienteEscena);
@@ -43,11 +43,11 @@ public class PuertaSalida : MonoBehaviour
                 string faltantes = gameManager.ObtenerObjetosFaltantes();
                 if (string.IsNullOrEmpty(faltantes))
                 {
-                    Debug.Log("La puerta está cerrada. Te faltan objetos obligatorios.");
+                    MensajeriaJugador.Mostrar("La puerta está cerrada. Aún faltan objetos obligatorios.");
                 }
                 else
                 {
-                    Debug.Log("La puerta está cerrada. Te faltan: " + faltantes);
+                    MensajeriaJugador.Mostrar("La puerta está cerrada. Te faltan: " + faltantes);
                 }
             }
         }

@@ -75,7 +75,7 @@ public class TrampaRuido : MonoBehaviour
             Debug.LogWarning("No existe ManagerRuido.instancia en la escena para: " + gameObject.name);
         }
 
-        Debug.Log("Milo piso una trampa de sonido.");
+        MensajeriaJugador.Mostrar("Pisaste una trampa de ruido.");
     }
 
     void AplicarNormalizacionVolumen()

@@ -16,6 +16,20 @@ public class InicioJuego : MonoBehaviour
 
     void Start()
     {
+        if (milo == null)
+        {
+            Debug.LogError("InicioJuego: falta referencia de Milo en " + gameObject.name);
+            enabled = false;
+            return;
+        }
+
+        if (puntoDeAparicion == null)
+        {
+            Debug.LogError("InicioJuego: falta PuntoDeAparicion en " + gameObject.name);
+            enabled = false;
+            return;
+        }
+
         // 1. Posicionamos a Milo en el lugar inicial (cama o puerta)
         milo.transform.position = puntoDeAparicion.position;
 

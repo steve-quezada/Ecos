@@ -25,6 +25,10 @@ public class EstaticaController : MonoBehaviour
     [Header("Aparición Periódica")]
     public float tiempoAparicion = 15f; 
     public float duracionPatrullaje = 10f; 
+    [Tooltip("Distancia mínima respecto a Milo para elegir punto de aparición")]
+    public float distanciaMinimaAparicionJugador = 4.5f;
+    [Tooltip("Tiempo de gracia tras cerrar un minijuego antes de volver a poder aparecer")]
+    public float enfriamientoTrasMinijuego = 4f;
     private float temporizadorAparicion = 0f;
     private float temporizadorPatrullaje = 0f;
 
@@ -41,6 +45,26 @@ public class EstaticaController : MonoBehaviour
     public float suavizadoCurva = 0.14f;
     [Range(0f, 1f)] public float probabilidadCambioLado = 0.3f;
 
+    [Header("Señal Visual de Aparición")]
+    public bool mostrarSenalAparicion = false;
+    public float duracionSenalAparicion = 1.0f;
+    public float escalaInicialSenal = 0.35f;
+    public float escalaFinalSenal = 2.25f;
+    public float grosorCruzSenal = 0.16f;
+    public Color colorSenalAparicion = new Color(1f, 0.36f, 0.12f, 0.95f);
+
+    [Header("Señal Direccional en Milo")]
+    public bool mostrarSenalDireccionEnMilo = true;
+    public float duracionSenalDireccion = 1.2f;
+    [Range(1, 6)] public int cantidadLineasDireccion = 3;
+    public float distanciaBaseSenalDireccion = 0.5f;
+    public float separacionSenalDireccion = 0.18f;
+    public float largoLineaSenalDireccion = 0.44f;
+    public float grosorLineaSenalDireccion = 0.06f;
+    public float amplitudRespiracionSenal = 0.06f;
+    public float velocidadRespiracionSenal = 6.2f;
+    public Color colorSenalDireccion = new Color(1f, 0.84f, 0.68f, 0.9f);
+
     [Header("Sonidos")]
     public AudioSource fuenteAudio;
     [Tooltip("Placeholder: asigna aqui el sonido de aparicion de La Estatica")]
@@ -53,6 +77,7 @@ public class EstaticaController : MonoBehaviour
     [Range(0f, 1f)] public float volumenMinimoGrito = 0.9f;
     [Range(1f, 2f)] public float multiplicadorPrioridadAparicion = 1.6f;
     private bool yaAtrapado = false;
+    private bool muerteForzadaEnCurso = false;
 
     private Transform jugador;
     private GameManager gameManager;
@@ -60,10 +85,12 @@ public class EstaticaController : MonoBehaviour
     private Collider2D colisionador;
     
     private bool estaActiva = false;
+    private bool pausadaPorMinijuego = false;
     private Vector2 objetivoCurvoPersecucion;
     private Vector2 velocidadSuavizadaPersecucion;
     private float temporizadorCurva = 0f;
     private int ladoCurva = 1;
+    private static Sprite spriteSenalAparicion;
 
     void Start()
     {
@@ -95,14 +122,12 @@ public class EstaticaController : MonoBehaviour
             return;
         }
 
-        float nivelDeRuido = ManagerRuido.instancia.ruidoActual;
-        float ruidoMaximo = ManagerRuido.instancia.ruidoMaximo;
-
-        if (nivelDeRuido >= ruidoMaximo)
+        if (pausadaPorMinijuego)
         {
-            ForzarAparicionYDerrota();
             return;
         }
+
+        float nivelDeRuido = ManagerRuido.instancia.ruidoActual;
 
         if (!estaActiva)
         {
@@ -140,29 +165,47 @@ public class EstaticaController : MonoBehaviour
         temporizadorCurva = 0f;
         velocidadSuavizadaPersecucion = Vector2.zero;
 
-        float xA = Random.Range(limiteMinX, limiteMaxX);
-        float yA = Random.Range(limiteMinY, limiteMaxY);
-        transform.position = new Vector2(xA, yA);
+        Vector2 puntoAparicion = ObtenerPuntoAparicionLejanoDelJugador();
+        transform.position = puntoAparicion;
         
         AsignarNuevoDestinoAleatorio();
+
+        if (mostrarSenalAparicion)
+        {
+            StartCoroutine(MostrarSenalAparicion(puntoAparicion));
+        }
+
+        if (mostrarSenalDireccionEnMilo)
+        {
+            StartCoroutine(MostrarSenalDireccionEnMilo(puntoAparicion));
+        }
 
         ActivarEstatica();
         ReproducirSonidoAparicion();
     }
 
-    void ForzarAparicionYDerrota()
+    public void PausarPorMinijuego()
     {
         if (yaAtrapado)
         {
             return;
         }
 
-        transform.position = jugador.position;
-        ActivarEstatica();
-        ReproducirSonidoAparicion();
+        pausadaPorMinijuego = true;
+        DesactivarEstatica();
+        temporizadorAparicion = 0f;
+    }
 
-        yaAtrapado = true;
-        StartCoroutine(SecuenciaMuerte());
+    public void ReanudarTrasMinijuego()
+    {
+        if (yaAtrapado)
+        {
+            return;
+        }
+
+        pausadaPorMinijuego = false;
+        float enfriamiento = Mathf.Clamp(enfriamientoTrasMinijuego, 0f, Mathf.Max(0.01f, tiempoAparicion));
+        temporizadorAparicion = Mathf.Max(0f, tiempoAparicion - enfriamiento);
     }
 
     void ActivarEstatica()
@@ -237,6 +280,171 @@ public class EstaticaController : MonoBehaviour
         puntoDestinoAleatorio = new Vector2(xAleatorio, yAleatorio);
     }
 
+    Vector2 ObtenerPuntoAparicionLejanoDelJugador()
+    {
+        Vector2 puntoMasLejanoEncontrado = new Vector2(Random.Range(limiteMinX, limiteMaxX), Random.Range(limiteMinY, limiteMaxY));
+        float mejorDistancia = -1f;
+        float distanciaMinima = Mathf.Max(0.5f, distanciaMinimaAparicionJugador);
+        Vector2 posicionJugador = jugador != null ? (Vector2)jugador.position : Vector2.zero;
+
+        for (int intento = 0; intento < 48; intento++)
+        {
+            Vector2 candidato = new Vector2(Random.Range(limiteMinX, limiteMaxX), Random.Range(limiteMinY, limiteMaxY));
+            float distancia = Vector2.Distance(candidato, posicionJugador);
+
+            if (distancia >= distanciaMinima)
+            {
+                return candidato;
+            }
+
+            if (distancia > mejorDistancia)
+            {
+                mejorDistancia = distancia;
+                puntoMasLejanoEncontrado = candidato;
+            }
+        }
+
+        return puntoMasLejanoEncontrado;
+    }
+
+    IEnumerator MostrarSenalAparicion(Vector2 posicion)
+    {
+        if (duracionSenalAparicion <= 0f)
+        {
+            yield break;
+        }
+
+        GameObject senal = new GameObject("SenalAparicionEstatica");
+        senal.transform.position = new Vector3(posicion.x, posicion.y, transform.position.z - 0.1f);
+
+        Sprite sprite = ObtenerSpriteSenal();
+        int orden = spriteRenderer != null ? spriteRenderer.sortingOrder + 20 : 100;
+
+        SpriteRenderer horizontal = CrearSegmentoSenal(senal.transform, "Horizontal", sprite, orden);
+        SpriteRenderer vertical = CrearSegmentoSenal(senal.transform, "Vertical", sprite, orden);
+
+        horizontal.transform.localScale = new Vector3(1f, Mathf.Max(0.02f, grosorCruzSenal), 1f);
+        vertical.transform.localScale = new Vector3(Mathf.Max(0.02f, grosorCruzSenal), 1f, 1f);
+
+        float tiempo = 0f;
+        while (tiempo < duracionSenalAparicion)
+        {
+            tiempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tiempo / duracionSenalAparicion);
+            float escala = Mathf.Lerp(escalaInicialSenal, escalaFinalSenal, t);
+            float alfa = Mathf.Lerp(colorSenalAparicion.a, 0f, t);
+
+            senal.transform.localScale = new Vector3(escala, escala, 1f);
+
+            Color colorActual = colorSenalAparicion;
+            colorActual.a = alfa;
+            horizontal.color = colorActual;
+            vertical.color = colorActual;
+
+            yield return null;
+        }
+
+        Destroy(senal);
+    }
+
+    IEnumerator MostrarSenalDireccionEnMilo(Vector2 puntoAparicion)
+    {
+        if (jugador == null || duracionSenalDireccion <= 0f)
+        {
+            yield break;
+        }
+
+        Vector2 direccion = puntoAparicion - (Vector2)jugador.position;
+        if (direccion.sqrMagnitude <= 0.0001f)
+        {
+            yield break;
+        }
+        direccion.Normalize();
+
+        Vector2 perpendicular = new Vector2(-direccion.y, direccion.x);
+        float angulo = Mathf.Atan2(perpendicular.y, perpendicular.x) * Mathf.Rad2Deg;
+
+        GameObject raiz = new GameObject("SenalDireccionMilo");
+        raiz.transform.position = jugador.position;
+
+        Sprite sprite = ObtenerSpriteSenal();
+        int orden = spriteRenderer != null ? spriteRenderer.sortingOrder + 25 : 120;
+        int cantidadLineas = Mathf.Clamp(cantidadLineasDireccion, 1, 6);
+        SpriteRenderer[] lineas = new SpriteRenderer[cantidadLineas];
+
+        for (int i = 0; i < cantidadLineas; i++)
+        {
+            lineas[i] = CrearSegmentoSenal(raiz.transform, "Respiracion_" + i, sprite, orden);
+            lineas[i].transform.localRotation = Quaternion.Euler(0f, 0f, angulo);
+            lineas[i].transform.localScale = new Vector3(Mathf.Max(0.08f, largoLineaSenalDireccion), Mathf.Max(0.02f, grosorLineaSenalDireccion), 1f);
+            lineas[i].color = colorSenalDireccion;
+        }
+
+        float tiempo = 0f;
+        while (tiempo < duracionSenalDireccion)
+        {
+            tiempo += Time.deltaTime;
+
+            if (jugador == null)
+            {
+                break;
+            }
+
+            raiz.transform.position = jugador.position;
+            float t = Mathf.Clamp01(tiempo / duracionSenalDireccion);
+            float desvanecimiento = Mathf.Lerp(colorSenalDireccion.a, 0f, t);
+
+            for (int i = 0; i < cantidadLineas; i++)
+            {
+                float fase = tiempo * velocidadRespiracionSenal + i * 0.7f;
+                float respiracion = Mathf.Sin(fase) * amplitudRespiracionSenal;
+                float distancia = distanciaBaseSenalDireccion + (separacionSenalDireccion * i) + respiracion;
+                Vector2 offset = direccion * Mathf.Max(0.05f, distancia);
+                lineas[i].transform.localPosition = new Vector3(offset.x, offset.y, 0f);
+
+                Color c = colorSenalDireccion;
+                c.a = Mathf.Max(0f, desvanecimiento);
+                lineas[i].color = c;
+            }
+
+            yield return null;
+        }
+
+        Destroy(raiz);
+    }
+
+    SpriteRenderer CrearSegmentoSenal(Transform parent, string nombre, Sprite sprite, int orden)
+    {
+        GameObject segmento = new GameObject(nombre);
+        segmento.transform.SetParent(parent, false);
+
+        SpriteRenderer render = segmento.AddComponent<SpriteRenderer>();
+        render.sprite = sprite;
+        render.sortingOrder = orden;
+        render.color = colorSenalAparicion;
+        return render;
+    }
+
+    Sprite ObtenerSpriteSenal()
+    {
+        if (spriteSenalAparicion != null)
+        {
+            return spriteSenalAparicion;
+        }
+
+        Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        tex.name = "EstaticaSenalTex";
+        tex.hideFlags = HideFlags.HideAndDontSave;
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+
+        Sprite sprite = Sprite.Create(tex, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 100f);
+        sprite.name = "EstaticaSenalSprite";
+        sprite.hideFlags = HideFlags.HideAndDontSave;
+        spriteSenalAparicion = sprite;
+        return spriteSenalAparicion;
+    }
+
     Vector2 LimitarPosicion(Vector2 posicion)
     {
         posicion.x = Mathf.Clamp(posicion.x, limiteMinX, limiteMaxX);
@@ -293,9 +501,81 @@ public class EstaticaController : MonoBehaviour
         }
     }
 
+    public bool ForzarMuertePorRuido()
+    {
+        if (yaAtrapado || muerteForzadaEnCurso)
+        {
+            return true;
+        }
+
+        if (jugador == null)
+        {
+            GameObject jugadorEncontrado = GameObject.FindGameObjectWithTag("Player");
+            if (jugadorEncontrado != null)
+            {
+                jugador = jugadorEncontrado.transform;
+            }
+        }
+
+        if (jugador == null)
+        {
+            return false;
+        }
+
+        StartCoroutine(SecuenciaAtaqueForzadoPorRuido());
+        return true;
+    }
+
+    IEnumerator SecuenciaAtaqueForzadoPorRuido()
+    {
+        muerteForzadaEnCurso = true;
+        pausadaPorMinijuego = false;
+
+        temporizadorAparicion = 0f;
+        temporizadorPatrullaje = 0f;
+        temporizadorCurva = 0f;
+        velocidadSuavizadaPersecucion = Vector2.zero;
+
+        Vector2 posicionJugador = jugador != null ? (Vector2)jugador.position : (Vector2)transform.position;
+        Vector2 direccion = Random.insideUnitCircle;
+        if (direccion.sqrMagnitude <= 0.0001f)
+        {
+            direccion = Vector2.right;
+        }
+
+        direccion.Normalize();
+        float distancia = Mathf.Clamp(distanciaMinimaAparicionJugador * 0.5f, 1.4f, 3.2f);
+        Vector2 puntoAparicion = LimitarPosicion(posicionJugador + (direccion * distancia));
+
+        transform.position = puntoAparicion;
+
+        if (mostrarSenalAparicion)
+        {
+            StartCoroutine(MostrarSenalAparicion(puntoAparicion));
+        }
+
+        if (mostrarSenalDireccionEnMilo)
+        {
+            StartCoroutine(MostrarSenalDireccionEnMilo(puntoAparicion));
+        }
+
+        ActivarEstatica();
+        ReproducirSonidoAparicion();
+
+        yield return new WaitForSecondsRealtime(0.35f);
+
+        if (!yaAtrapado)
+        {
+            yaAtrapado = true;
+            yield return StartCoroutine(SecuenciaMuerte());
+        }
+
+        muerteForzadaEnCurso = false;
+    }
+
     IEnumerator SecuenciaMuerte()
     {
-        Debug.Log("¡La Estática te atrapó!");
+        MensajeriaJugador.Mostrar("La Estática te alcanzó.");
 
         MiloController milo = FindObjectOfType<MiloController>();
         if (milo != null) milo.puedeMoverse = false;

@@ -27,6 +27,8 @@ public class ManagerRompecabezas : MonoBehaviour
     // OnEnable se ejecuta automáticamente en cuanto el Panel de este script se ACTIVA
     void OnEnable()
     {
+        AsegurarPanelPantallaCompleta();
+
         if (gameManager == null)
         {
             gameManager = FindObjectOfType<GameManager>();
@@ -37,6 +39,7 @@ public class ManagerRompecabezas : MonoBehaviour
             gameManager.OcultarHudProgresoEnMinijuego();
         }
 
+        ResolverHudMinijuego();
         if (uiObjetosObligatorios != null) uiObjetosObligatorios.SetActive(false);
         if (uiEco != null) uiEco.SetActive(false);
         AjustarPiezasDentroDeAreaVisible();
@@ -168,5 +171,49 @@ public class ManagerRompecabezas : MonoBehaviour
     {
         yield return null;
         AjustarPiezasDentroDeAreaVisible();
+    }
+
+    private void ResolverHudMinijuego()
+    {
+        if (uiObjetosObligatorios == null)
+        {
+            uiObjetosObligatorios = GameObject.Find("ObjetosObligatorios");
+        }
+
+        if (uiEco == null)
+        {
+            uiEco = GameObject.Find("ECO");
+            if (uiEco == null)
+            {
+                uiEco = GameObject.Find("ECO_Cocina");
+            }
+        }
+    }
+
+    private void AsegurarPanelPantallaCompleta()
+    {
+        RectTransform rectPanel = transform as RectTransform;
+        if (rectPanel == null)
+        {
+            return;
+        }
+
+        rectPanel.anchorMin = Vector2.zero;
+        rectPanel.anchorMax = Vector2.one;
+        rectPanel.offsetMin = Vector2.zero;
+        rectPanel.offsetMax = Vector2.zero;
+        rectPanel.localScale = Vector3.one;
+
+        CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+
+        transform.SetAsLastSibling();
     }
 }

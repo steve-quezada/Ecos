@@ -39,6 +39,9 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
     [SerializeField] private Vector2 posicionInputRespuesta = new Vector2(0f, -360f);
     [SerializeField] private Vector2 posicionBotonVerificar = new Vector2(0f, -434f);
     [SerializeField] private Vector2 posicionBotonCerrar = new Vector2(0f, -500f);
+    [SerializeField] private bool usarAnclajeBotonesHabitacion = true;
+    [SerializeField] private float margenLateralBotones = 190f;
+    [SerializeField] private float margenInferiorBotones = 52f;
 
     [Header("Apariencia")]
     [SerializeField] private Color colorFondo = new Color(0.92f, 0.89f, 0.84f, 0.98f);
@@ -77,6 +80,8 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
 
     void OnEnable()
     {
+        AsegurarPanelPantallaCompleta();
+
         if (gameManager == null)
         {
             gameManager = FindObjectOfType<GameManager>();
@@ -86,6 +91,8 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
         {
             gameManager.OcultarHudProgresoEnMinijuego();
         }
+
+        ResolverHudMinijuego();
 
         if (uiObjetosObligatorios != null) uiObjetosObligatorios.SetActive(false);
         if (uiEco != null) uiEco.SetActive(false);
@@ -123,7 +130,7 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
 
         if (respuestaJugador == respuestaSecreta)
         {
-            Debug.Log("Correcto. Milo resolvio el criptograma de Sala y recogio el Eco.");
+            MensajeriaJugador.Mostrar("¡Correcto! Resolviste el criptograma.");
 
             if (gameManager == null)
             {
@@ -139,7 +146,7 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
         }
         else
         {
-            Debug.Log("Respuesta incorrecta. Intenta de nuevo.");
+            MensajeriaJugador.Mostrar("Respuesta incorrecta. Prueba otra vez.");
             inputRespuesta.text = string.Empty;
             inputRespuesta.ActivateInputField();
         }
@@ -179,7 +186,9 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
 
         Image fondo = raiz.GetComponent<Image>();
         fondo.sprite = spriteBlanco;
-        fondo.color = colorFondo;
+        Color colorFondoOpaco = colorFondo;
+        colorFondoOpaco.a = 1f;
+        fondo.color = colorFondoOpaco;
         fondo.raycastTarget = true;
 
         CrearCirculoEquivalencias(raizGenerada);
@@ -359,10 +368,24 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
         inputRespuesta = CrearInputField(parent, posicionInputRespuesta, new Vector2(480f, 54f), out inputRect);
 
         Button botonVerificar = CrearBoton(parent, "Verificar", posicionBotonVerificar, new Vector2(190f, 52f));
+        if (usarAnclajeBotonesHabitacion)
+        {
+            AnclarBotonDerechaInferior(botonVerificar.GetComponent<RectTransform>());
+        }
         botonVerificar.onClick.AddListener(VerificarRespuesta);
+    }
 
-        Button botonCerrar = CrearBoton(parent, "Cerrar", posicionBotonCerrar, new Vector2(190f, 44f));
-        botonCerrar.onClick.AddListener(CerrarSinResolver);
+    private void AnclarBotonDerechaInferior(RectTransform rect)
+    {
+        if (rect == null)
+        {
+            return;
+        }
+
+        rect.anchorMin = new Vector2(1f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = new Vector2(-Mathf.Abs(margenLateralBotones), Mathf.Abs(margenInferiorBotones));
     }
 
     private InputField CrearInputField(RectTransform parent, Vector2 posicion, Vector2 tamano, out RectTransform rect)
@@ -465,6 +488,67 @@ public class AcertijoEcoSalaVisual : MonoBehaviour
 
         inputRespuesta.text = string.Empty;
         inputRespuesta.ActivateInputField();
+    }
+
+    private void ResolverHudMinijuego()
+    {
+        if (uiObjetosObligatorios == null)
+        {
+            uiObjetosObligatorios = GameObject.Find("ObjetosObligatorios");
+        }
+
+        if (uiEco == null)
+        {
+            uiEco = GameObject.Find("ECO");
+            if (uiEco == null)
+            {
+                uiEco = GameObject.Find("ECO_Cocina");
+            }
+        }
+    }
+
+    private void AsegurarPanelPantallaCompleta()
+    {
+        RectTransform rectPanel = transform as RectTransform;
+        if (rectPanel != null)
+        {
+            rectPanel.anchorMin = Vector2.zero;
+            rectPanel.anchorMax = Vector2.one;
+            rectPanel.offsetMin = Vector2.zero;
+            rectPanel.offsetMax = Vector2.zero;
+            rectPanel.localScale = Vector3.one;
+        }
+
+        CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+
+        transform.SetAsLastSibling();
+
+        if (raizGenerada != null)
+        {
+            raizGenerada.anchorMin = Vector2.zero;
+            raizGenerada.anchorMax = Vector2.one;
+            raizGenerada.offsetMin = Vector2.zero;
+            raizGenerada.offsetMax = Vector2.zero;
+            raizGenerada.localScale = Vector3.one;
+            raizGenerada.SetAsLastSibling();
+
+            Image fondoGenerado = raizGenerada.GetComponent<Image>();
+            if (fondoGenerado != null)
+            {
+                Color colorFondoOpaco = colorFondo;
+                colorFondoOpaco.a = 1f;
+                fondoGenerado.color = colorFondoOpaco;
+                fondoGenerado.raycastTarget = true;
+            }
+        }
     }
 
     private void CerrarYConsumirEco()

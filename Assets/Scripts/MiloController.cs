@@ -53,7 +53,15 @@ public class MiloController : MonoBehaviour
             {
                 luzLinterna.SetActive(linternaEncendida);
             }
-            Debug.Log("Linterna: " + (linternaEncendida ? "ON" : "OFF"));
+
+            if (linternaEncendida)
+            {
+                MensajeriaJugador.Mostrar("Linterna encendida.");
+            }
+            else
+            {
+                MensajeriaJugador.Mostrar("Linterna apagada.");
+            }
         }
     }
 

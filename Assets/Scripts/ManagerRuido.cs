@@ -84,7 +84,7 @@ public class ManagerRuido : MonoBehaviour
     void InvocarEstatica()
     {
         estaticaInvocada = true;
-        Debug.Log("¡EL RUIDO LLEGÓ A 5! La Estática ha aparecido.");
+        MensajeriaJugador.Mostrar("El ruido llamó la atención de la Estática.");
     }
 
     // NUEVO: Función para terminar el juego por exceso de ruido
@@ -96,7 +96,21 @@ public class ManagerRuido : MonoBehaviour
         }
 
         derrotaEnCurso = true;
-        Debug.Log("Milo hizo demasiado ruido. GAME OVER.");
+
+        MiloController milo = FindObjectOfType<MiloController>();
+        if (milo != null)
+        {
+            milo.puedeMoverse = false;
+        }
+
+        MensajeriaJugador.Mostrar("Hiciste demasiado ruido.");
+
+        EstaticaController estatica = FindObjectOfType<EstaticaController>();
+        if (estatica != null && estatica.ForzarMuertePorRuido())
+        {
+            return;
+        }
+
         StartCoroutine(SecuenciaDerrotaPorRuido());
     }
 
