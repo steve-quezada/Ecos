@@ -222,6 +222,12 @@ public class Escondite : MonoBehaviour
                 jugadorTransform = collision.transform;
                 miloController = collision.GetComponent<MiloController>();
                 miloSprite = collision.GetComponent<SpriteRenderer>();
+
+                if (contornoRenderer != null && miloSprite != null)
+                {
+                    contornoRenderer.sortingLayerID = miloSprite.sortingLayerID;
+                    contornoRenderer.sortingOrder = miloSprite.sortingOrder - 1;
+                }
             }
 
             ActualizarVisibilidadIndicador();
