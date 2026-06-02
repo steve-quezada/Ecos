@@ -50,6 +50,12 @@ public class EsconditeTrampa : MonoBehaviour
 
     void Start()
     {
+        // Todos los colliders de la trampa deben ser trigger.
+        foreach (Collider2D col in GetComponents<Collider2D>())
+        {
+            col.isTrigger = true;
+        }
+
         InicializarIndicadorVisual();
         InicializarContornoVisual();
 
@@ -83,6 +89,17 @@ public class EsconditeTrampa : MonoBehaviour
         {
             jugadorEnRango = true;
             milo = collision.GetComponent<MiloController>();
+
+            // Asegurar que Milo se dibuje por encima del contorno siempre.
+            SpriteRenderer miloSprite = collision.GetComponent<SpriteRenderer>();
+            if (miloSprite != null && contornoRenderer != null)
+            {
+                if (miloSprite.sortingOrder <= contornoRenderer.sortingOrder)
+                {
+                    miloSprite.sortingOrder = contornoRenderer.sortingOrder + 1;
+                }
+            }
+
             ActualizarVisibilidadIndicador();
             ActualizarVisibilidadContorno();
         }
@@ -295,7 +312,7 @@ public class EsconditeTrampa : MonoBehaviour
         if (spriteBase != null)
         {
             contornoRenderer.sortingLayerID = spriteBase.sortingLayerID;
-            contornoRenderer.sortingOrder = spriteBase.sortingOrder + 1;
+            contornoRenderer.sortingOrder = spriteBase.sortingOrder;
         }
         else
         {

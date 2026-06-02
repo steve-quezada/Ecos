@@ -62,6 +62,13 @@ public class Escondite : MonoBehaviour
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
+
+        // Todos los colliders del escondite deben ser trigger para que Milo pueda atravesarlos.
+        foreach (Collider2D col in GetComponents<Collider2D>())
+        {
+            col.isTrigger = true;
+        }
+
         InicializarIndicadorVisual();
         InicializarContornoVisual();
 
@@ -222,11 +229,14 @@ public class Escondite : MonoBehaviour
                 jugadorTransform = collision.transform;
                 miloController = collision.GetComponent<MiloController>();
                 miloSprite = collision.GetComponent<SpriteRenderer>();
+            }
 
-                if (contornoRenderer != null && miloSprite != null)
+            // Asegurar que Milo se dibuje por encima del contorno siempre.
+            if (miloSprite != null && contornoRenderer != null)
+            {
+                if (miloSprite.sortingOrder <= contornoRenderer.sortingOrder)
                 {
-                    contornoRenderer.sortingLayerID = miloSprite.sortingLayerID;
-                    contornoRenderer.sortingOrder = miloSprite.sortingOrder - 1;
+                    miloSprite.sortingOrder = contornoRenderer.sortingOrder + 1;
                 }
             }
 
@@ -443,7 +453,7 @@ public class Escondite : MonoBehaviour
         if (spriteBase != null)
         {
             contornoRenderer.sortingLayerID = spriteBase.sortingLayerID;
-            contornoRenderer.sortingOrder = spriteBase.sortingOrder + 1;
+            contornoRenderer.sortingOrder = spriteBase.sortingOrder;
         }
         else
         {
